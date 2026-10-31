@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const links = [
   { label: "Work", href: "#services" },
@@ -135,7 +136,8 @@ export default function Hero() {
 
       <div className="wrap">
         <a href="#top" aria-label="23D Studio home">
-          <Image className="nav-logo" src="/images/logo-black.png" alt="23D Studio" width={320} height={302} priority />
+          <Image className="nav-logo logo-day" src="/images/logo-black.png" alt="23D Studio" width={320} height={302} priority />
+          <Image className="nav-logo logo-night" src="/images/logo-white.png" alt="" aria-hidden="true" width={320} height={303} priority />
         </a>
 
         <button
@@ -159,10 +161,11 @@ export default function Hero() {
           </li>
         </ul>
 
+        <ThemeToggle />
         <a className="pill pill-dark nav-cta" href="#contact">Start the Project➔</a>
 
         <a className={`to-top${floating ? " floating" : ""}`} href="#top" aria-label="Back to top">
-          <svg viewBox="0 0 12 22" fill="none" stroke="#000" strokeWidth="1.4" aria-hidden="true">
+          <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
             <path d="M6 21V1M1.5 5.5 6 1l4.5 4.5" />
           </svg>
         </a>

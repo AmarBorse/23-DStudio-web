@@ -9,6 +9,7 @@ const services = [
     alt: "Exterior render of a modern timber and glass house at dusk",
     ruleFirst: false,
     reveal: true, // white "clay" image that turns colourful on hover
+    clay: "/images/service-visualisation-clay.jpg",
   },
   {
     title: "Architectural Walkthroughs",
@@ -17,6 +18,7 @@ const services = [
     alt: "Modern villa with a curved pool at sunset",
     ruleFirst: true, // this row is mirrored in the design: line sits before the title
     reveal: true,
+    clay: "/images/service-walkthroughs-clay.jpg",
   },
   {
     title: "Virtual Reality Tours",
