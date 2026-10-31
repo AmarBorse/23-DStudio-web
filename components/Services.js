@@ -1,4 +1,5 @@
 import Image from "next/image";
+import RevealImage from "@/components/RevealImage";
 
 const services = [
   {
@@ -7,6 +8,7 @@ const services = [
     image: "/images/service-visualisation.jpg",
     alt: "Exterior render of a modern timber and glass house at dusk",
     ruleFirst: false,
+    reveal: true, // white "clay" image that turns colourful on hover
   },
   {
     title: "Architectural Walkthroughs",
@@ -14,6 +16,7 @@ const services = [
     image: "/images/service-walkthroughs.jpg",
     alt: "Modern villa with a curved pool at sunset",
     ruleFirst: true, // this row is mirrored in the design: line sits before the title
+    reveal: true,
   },
   {
     title: "Virtual Reality Tours",
@@ -40,7 +43,11 @@ export default function Services() {
         {services.map((s, i) => (
           <article className={`svc svc-${i + 1}`} key={s.title}>
             <div className="svc-img">
-              <Image src={s.image} alt={s.alt} fill sizes="(max-width: 819px) 100vw, 660px" />
+              {s.reveal ? (
+                <RevealImage src={s.image} alt={s.alt} claySrc={s.clay} sizes="(max-width: 819px) 100vw, 660px" />
+              ) : (
+                <Image src={s.image} alt={s.alt} fill sizes="(max-width: 819px) 100vw, 660px" />
+              )}
               <a className="pill pill-light" href="#contact">Explore work ➔</a>
             </div>
             <div className="svc-text">

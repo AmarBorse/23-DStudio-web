@@ -13,7 +13,7 @@
   --ink:#37302b;
   --black:#000;
   --cream:#fff8f1;
-  --brown:#8c7666;
+  --brown:#90795d;
   --white:#fff;
   --avenir:"Avenir LT Pro","Avenir Next","Avenir","Nunito Sans",system-ui,sans-serif;
   --spartan:"League Spartan","Avenir Next",system-ui,sans-serif;
@@ -38,12 +38,17 @@ a{color:inherit;text-decoration:none}
 
 /* ================= HERO ================= */
 .hero{position:relative;height:calc(576 * var(--u));overflow:hidden;background:#f3ece4}
-.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;transform:scaleX(-1)}
+.hero-track{position:absolute;inset:0;display:flex;will-change:transform}
+.hero-slide{position:relative;flex:0 0 100%;height:100%;overflow:hidden}
+.hero-img{object-fit:cover;object-position:50% 50%}
+.hero-img.mirror{transform:scaleX(-1)}
+.hero-dots{position:absolute;left:50%;bottom:calc(30 * var(--u));transform:translateX(-50%);z-index:3;display:flex;gap:8px}
+.hero-dots button{width:8px;height:8px;border-radius:999px;border:0;box-shadow:0 0 0 1px rgba(255,255,255,.7);padding:0;cursor:pointer;background:rgba(55,48,43,.35);transition:width .35s,background .35s}
+.hero-dots button.active{width:24px;background:var(--ink)}
+.hero-dots button:hover{background:rgba(55,48,43,.7)}
 .hero::before{content:"";position:absolute;inset:0;z-index:1;
   background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.82) 14%,rgba(255,255,255,.35) 38%,rgba(255,255,255,0) 62%)}
 .hero .wrap{z-index:2}
-.watermark{position:absolute;left:calc(-47 * var(--u));top:calc(18 * var(--u));width:calc(714 * var(--u));opacity:.55;pointer-events:none;user-select:none;clip-path:inset(0 0 41% 0)}
-
 .nav-logo{position:absolute;left:calc(89 * var(--u));top:calc(59 * var(--u));width:calc(60 * var(--u))}
 .nav-links{position:absolute;left:calc(293 * var(--u));top:calc(63 * var(--u));display:flex;gap:calc(75 * var(--u));list-style:none}
 .nav-links a{font-weight:800;font-size:calc(12 * var(--u));color:var(--ink);position:relative}
@@ -52,11 +57,8 @@ a{color:inherit;text-decoration:none}
 .nav-cta{position:absolute;left:calc(840 * var(--u));top:calc(60 * var(--u));width:calc(126 * var(--u));height:calc(33 * var(--u));font-size:calc(11 * var(--u))}
 .menu-btn{display:none}
 
-.hero-title{position:absolute;left:calc(87 * var(--u));top:calc(447 * var(--u));font-family:var(--spartan);font-weight:700;
-  font-size:calc(42.9 * var(--u));line-height:1;color:rgba(255,255,255,.55);white-space:nowrap;letter-spacing:-.005em}
-.hero-cta{position:absolute;left:calc(87 * var(--u));top:calc(515 * var(--u));width:calc(139 * var(--u));height:calc(35 * var(--u));font-size:calc(12 * var(--u))}
 .to-top{position:absolute;left:calc(928 * var(--u));top:calc(513 * var(--u));width:calc(38 * var(--u));height:calc(38 * var(--u));
-  border:1.5px solid #000;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.15);transition:background .2s}
+  border:1.5px solid #000;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.4);transition:background .2s}
 .to-top:hover{background:#fff}
 .to-top svg{width:42%;height:60%}
 .to-top.floating{position:fixed;left:auto;top:auto;right:24px;bottom:84px;width:42px;height:42px;background:#fff;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.12)}
@@ -155,7 +157,7 @@ a{color:inherit;text-decoration:none}
 .f-copy span{margin-left:.6em}
 .f-credit{position:absolute;right:calc(69 * var(--u));top:calc(266 * var(--u));font-size:calc(9 * var(--u));letter-spacing:.09em}
 
-.chat{position:fixed;right:24px;bottom:24px;width:46px;height:46px;border-radius:50%;background:rgba(68,62,60,.9);display:grid;place-items:center;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.2);transition:transform .2s}
+.chat{position:fixed;right:24px;bottom:24px;width:46px;height:46px;border-radius:50%;background:#7d6241;display:grid;place-items:center;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.2);transition:transform .2s}
 .chat:hover{transform:scale(1.07)}
 .chat svg{width:22px;height:22px}
 
@@ -164,10 +166,10 @@ a{color:inherit;text-decoration:none}
   :root{--u:1px}
   .wrap{width:100%;padding:0 22px}
   /* hero */
-  .hero{height:min(92svh,720px);min-height:560px}
-  .hero-bg{object-position:38% 50%}
-  .watermark{left:-20%;top:90px;width:120%;opacity:.45}
-  .nav-logo{left:22px;top:22px;width:48px}
+  .hero{height:calc(56.25vw + 130px);min-height:340px;max-height:560px}
+  .hero-img.mirror{object-position:38% 50%}
+  .hero-dots{bottom:22px}
+    .nav-logo{left:22px;top:22px;width:48px}
   .nav-cta{display:none}
   .menu-btn{display:grid;place-items:center;position:absolute;right:22px;top:26px;width:42px;height:42px;border-radius:50%;background:var(--ink);border:0;cursor:pointer;z-index:5}
   .menu-btn span{display:block;width:18px;height:1.5px;background:#fff;box-shadow:0 -5px 0 #fff,0 5px 0 #fff}
@@ -175,9 +177,7 @@ a{color:inherit;text-decoration:none}
   .nav-links.open{transform:none}
   .nav-links a{font-size:20px}
   .nav-links .m-cta{display:list-item}
-  .hero-title{left:22px;right:22px;top:auto;bottom:100px;white-space:normal;color:rgba(255,255,255,.8);text-shadow:0 1px 18px rgba(0,0,0,.12);font-size:clamp(34px,10vw,46px);line-height:1.02}
-  .hero-cta{left:22px;top:auto;bottom:34px;width:160px;height:42px;font-size:14px}
-  .to-top{left:auto;right:22px;top:auto;bottom:36px;width:40px;height:40px}
+      .to-top{left:auto;right:16px;top:auto;bottom:12px;width:36px;height:36px}
   /* stats */
   .stats{height:auto;padding:30px 0}
   .stats .wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -245,4 +245,16 @@ a{color:inherit;text-decoration:none}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .m-cta .pill{padding:12px 22px;font-size:14px;font-weight:400}
 .svc-3 .svc-img img{object-position:50% 45%}
-.watermark,.nav-logo,.f-logo,.proc-art{height:auto}
+.nav-logo,.f-logo,.proc-art{height:auto}
+
+/* ---------- White "clay" → colour reveal on service images ---------- */
+.reveal{position:absolute;inset:0}
+.reveal img{object-fit:cover}
+.reveal-clay.auto{filter:grayscale(1) sepia(.12) contrast(.42) brightness(1.62)}
+.reveal-colour{clip-path:circle(0% at var(--rx) var(--ry));transition:clip-path .9s cubic-bezier(.65,0,.35,1)}
+.reveal.is-on .reveal-colour{clip-path:circle(150% at var(--rx) var(--ry))}
+.svc-img .pill{z-index:2}
+@media (prefers-reduced-motion: reduce){
+  .reveal-colour{transition:opacity .3s;clip-path:none;opacity:0}
+  .reveal.is-on .reveal-colour{opacity:1}
+}
