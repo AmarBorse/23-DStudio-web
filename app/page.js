@@ -4,6 +4,7 @@ import Services from "@/components/Services";
 import Process from "@/components/Process";
 import Footer from "@/components/Footer";
 import ChatButton from "@/components/ChatButton";
+import Animations from "@/components/Animations";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       </main>
       <Footer />
       <ChatButton />
+      <Animations />
     </>
   );
 }

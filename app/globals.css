@@ -121,7 +121,8 @@ a{color:inherit;text-decoration:none}
 .proc-our{position:absolute;left:calc(95 * var(--u));top:calc(16 * var(--u));font-family:"Playlist",cursive;font-size:calc(70.7 * var(--u));line-height:1.2;color:#000}
 .proc-title{position:absolute;left:calc(146 * var(--u));top:calc(105 * var(--u));font-family:"Hussar",var(--spartan);font-size:calc(60.9 * var(--u));line-height:1.1;color:#000;font-weight:400}
 .proc-sub{position:absolute;left:calc(88 * var(--u));top:calc(193 * var(--u));font-weight:800;font-size:calc(18 * var(--u));color:#000}
-.proc-art{position:absolute;left:calc(750 * var(--u));top:calc(20 * var(--u));width:calc(176 * var(--u))}
+.proc-art-wrap{position:absolute;left:calc(750 * var(--u));top:calc(20 * var(--u));width:calc(176 * var(--u))}
+.proc-art{width:100%}
 .proc-rule{position:absolute;left:calc(88 * var(--u));width:calc(878 * var(--u));top:calc(229 * var(--u));height:1px;background:var(--ink)}
 .timeline{position:absolute;left:0;top:0;width:100%;height:100%;list-style:none}
 .timeline::before{content:"";position:absolute;left:calc(144 * var(--u));width:calc(724 * var(--u));top:calc(379 * var(--u));height:1.5px;background:#000}
@@ -204,12 +205,12 @@ a{color:inherit;text-decoration:none}
   /* process */
   .process{height:auto;padding:40px 0 50px}
   .process::before{background-size:cover}
-  .proc-our,.proc-title,.proc-sub,.proc-art,.proc-rule{position:relative;left:auto;top:auto}
+  .proc-our,.proc-title,.proc-sub,.proc-art-wrap,.proc-rule{position:relative;left:auto;top:auto}
   .proc-our{font-size:56px;line-height:1}
   .proc-title{font-size:clamp(42px,13vw,58px);margin:-4px 0 0 34px}
   .proc-sub{margin-top:12px;font-size:17px}
   .process .wrap{display:flex;flex-direction:column}
-  .proc-art{order:-1;align-self:flex-end;width:118px;margin:-10px 0 -40px}
+  .proc-art-wrap{order:-1;align-self:flex-end;width:118px;margin:-10px 0 -40px}
   .proc-our{align-self:flex-start}
   .proc-rule{width:100%;margin-top:18px}
   .timeline{position:relative;height:auto;margin-top:30px;padding-left:40px}
@@ -251,11 +252,20 @@ a{color:inherit;text-decoration:none}
 .reveal{position:absolute;inset:0}
 .reveal img{object-fit:cover}
 .reveal-clay.auto{filter:grayscale(1) sepia(.12) contrast(.42) brightness(1.62)}
-.reveal-colour{clip-path:circle(0% at var(--rx) var(--ry));transition:clip-path .9s cubic-bezier(.65,0,.35,1)}
-.reveal.is-on .reveal-colour{clip-path:circle(150% at var(--rx) var(--ry))}
+/* colour spreads from the cursor with a soft, feathered edge */
+@property --reveal{syntax:"<percentage>";inherits:false;initial-value:0%}
+.reveal-colour{--reveal:0%;
+  -webkit-mask-image:radial-gradient(circle at var(--rx) var(--ry),#000 calc(var(--reveal) - 22%),transparent var(--reveal));
+          mask-image:radial-gradient(circle at var(--rx) var(--ry),#000 calc(var(--reveal) - 22%),transparent var(--reveal))}
+.reveal.is-on .reveal-colour{--reveal:150%}
+/* timing (kept specific so other image transitions can't override it) */
+.svc-img .reveal img.reveal-colour,
+html.anim [data-anim^="wipe"] .reveal img.reveal-colour{transition:--reveal 2.2s cubic-bezier(.55,.05,.3,1),scale 1.8s var(--ease) .1s,transform .6s ease}
+.svc-img .reveal:not(.is-on) img.reveal-colour{transition:--reveal 1.4s cubic-bezier(.5,0,.3,1),scale 1.8s var(--ease) .1s,transform .6s ease}
 .svc-img .pill{z-index:2}
 @media (prefers-reduced-motion: reduce){
-  .reveal-colour{transition:opacity .3s;clip-path:none;opacity:0}
+  .reveal-colour{-webkit-mask-image:none;mask-image:none;opacity:0}
+  .svc-img .reveal img.reveal-colour{transition:opacity .4s}
   .reveal.is-on .reveal-colour{opacity:1}
 }
 
@@ -320,3 +330,58 @@ html.theme-anim body,html.theme-anim body *,html.theme-anim body *::before,html.
   [data-theme="dark"] .menu-btn span{background:#1b1714;box-shadow:0 -5px 0 #1b1714,0 5px 0 #1b1714}
 }
 [data-theme="dark"] .reveal-clay{filter:brightness(.78)}
+
+/* ================= ANIMATIONS =================
+   Elements get data-anim="..." in the components; Animations.js adds data-in when they scroll into view.
+   Everything is only hidden when <html> has the "anim" class (not for reduced-motion visitors). */
+:root{--ease:cubic-bezier(.22,.8,.24,1)}
+html.anim [data-anim]{transition:opacity .9s var(--ease) var(--d,0s),translate 1s var(--ease) var(--d,0s),scale 1s var(--ease) var(--d,0s),
+  clip-path 1.3s var(--ease) var(--d,0s),background-color .3s,border-color .3s,color .3s}
+html.anim [data-anim="fade"]{opacity:0}
+html.anim [data-anim="fade-up"]{opacity:0;translate:0 30px}
+html.anim [data-anim="fade-down"]{opacity:0;translate:0 -16px}
+html.anim [data-anim="grow"]{scale:0 1;transform-origin:left center}
+html.anim .svc-2 [data-anim="grow"]{transform-origin:right center}
+html.anim [data-anim="write"]{clip-path:inset(-30% 100% -30% -30%)}
+html.anim [data-anim="wipe-left"]{clip-path:inset(0 100% 0 0)}
+html.anim [data-anim="wipe-right"]{clip-path:inset(0 0 0 100%)}
+html.anim [data-anim][data-in]{opacity:1;translate:0 0;scale:1 1}
+html.anim [data-anim="write"][data-in]{clip-path:inset(-30% -30% -30% -30%)}
+html.anim [data-anim^="wipe"][data-in]{clip-path:inset(0 0 0 0)}
+
+/* image inside a wipe settles from a slight zoom */
+html.anim [data-anim^="wipe"] img{scale:1.18;transition:scale 1.8s var(--ease) .1s,transform .6s ease}
+html.anim [data-anim^="wipe"][data-in] img{scale:1}
+
+/* letters rising one by one */
+.split .ch{display:inline-block}
+html.anim [data-anim="letters"] .ch{opacity:0;translate:0 .45em;transition:opacity .7s var(--ease) var(--d,0s),translate .9s var(--ease) var(--d,0s)}
+html.anim [data-anim="letters"][data-in] .ch{opacity:1;translate:0 0}
+
+/* process timeline: line draws across, dots pop in turn */
+html.anim [data-anim="draw"]::before{scale:0 1;transform-origin:left center;transition:scale 1.9s var(--ease) .15s}
+html.anim [data-anim="draw"][data-in]::before{scale:1 1}
+html.anim .step::before{scale:0;transition:scale .55s cubic-bezier(.34,1.7,.5,1) calc(var(--d,0s) + .1s)}
+html.anim .step[data-in]::before{scale:1}
+@media (max-width: 819px){
+  html.anim [data-anim="draw"]::before{scale:1 0;transform-origin:center top}
+  html.anim [data-anim="draw"][data-in]::before{scale:1 1}
+}
+
+/* parallax side text */
+.vertical{translate:0 var(--py,0px)}
+
+/* hero slow zoom (Ken Burns) */
+html.anim .hero-img{animation:kenburns 14s ease-in-out infinite alternate}
+@keyframes kenburns{from{scale:1}to{scale:1.07}}
+
+/* sketch gently floating */
+html.anim .proc-art{animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-8px) rotate(-1deg)}}
+
+/* button arrows nudge on hover */
+.pill .arr{display:inline-block;margin-left:2px;transition:translate .3s var(--ease)}
+.pill:hover .arr{translate:4px 0}
+@media (max-width: 819px){
+  html.anim .nav-links [data-anim]{opacity:1;translate:0 0}
+}

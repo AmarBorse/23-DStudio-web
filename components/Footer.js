@@ -18,25 +18,25 @@ export default function Footer() {
   return (
     <footer className="footer" id="contact">
       <div className="wrap">
-        <Image className="f-logo" src="/images/logo-white.png" alt="23D Studio" width={320} height={303} />
+        <Image data-anim="fade-up" className="f-logo" src="/images/logo-white.png" alt="23D Studio" width={320} height={303} />
 
-        <ul className="f-col nav">
+        <ul className="f-col nav" data-anim="fade-up" style={{ "--d": "0.1s" }}>
           {pages.map((p) => (
             <li key={p.label}><a href={p.href}>{p.label}</a></li>
           ))}
         </ul>
 
-        <ul className="f-col social">
+        <ul className="f-col social" data-anim="fade-up" style={{ "--d": "0.2s" }}>
           {social.map((s) => (
             <li key={s.label}><a href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a></li>
           ))}
         </ul>
 
         {/* TODO: replace with the studio's real email or a contact page */}
-        <a className="pill f-cta" href="mailto:hello@23dstudio.com">Start the Project➔</a>
+        <a className="pill f-cta" href="mailto:hello@23dstudio.com" data-anim="fade-up" style={{ "--d": "0.3s" }}>Start the Project<span className="arr">➔</span></a>
 
-        <h2 className="f-head">Let&apos;s Visualise It Together.</h2>
-        <p className="f-text">
+        <h2 className="f-head" data-anim="fade-up" style={{ "--d": "0.2s" }}>Let&apos;s Visualise It Together.</h2>
+        <p className="f-text" data-anim="fade-up" style={{ "--d": "0.3s" }}>
           Whether you are an architect, interior designer, builder or developer, let&apos;s bring your next project to life
           through meaningful visual experiences.
         </p>

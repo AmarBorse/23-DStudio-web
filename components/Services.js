@@ -1,5 +1,6 @@
 import Image from "next/image";
 import RevealImage from "@/components/RevealImage";
+import SplitText from "@/components/SplitText";
 
 const services = [
   {
@@ -33,32 +34,33 @@ export default function Services() {
   return (
     <section className="services" id="services">
       <div className="wrap">
-        <div className="vertical" aria-hidden="true">EXPERIENCE BUILT THROUGH PROJECTS</div>
-        <div className="svc-our" aria-hidden="true">Our</div>
+        <div className="vertical" aria-hidden="true" data-parallax="0.25">EXPERIENCE BUILT THROUGH PROJECTS</div>
+        <div className="svc-our" aria-hidden="true" data-anim="write">Our</div>
         <h2 className="svc-title">
-          <span className="sr-only">Our </span>SERVICES
+          <span className="sr-only">Our </span>
+          <SplitText text="SERVICES" delay={0.35} />
         </h2>
-        <p className="svc-tagline">
+        <p className="svc-tagline" data-anim="fade-up" style={{ "--d": "0.9s" }}>
           Visualizing <br />Spaces Before <br />They Exist
         </p>
 
         {services.map((s, i) => (
           <article className={`svc svc-${i + 1}`} key={s.title}>
-            <div className="svc-img">
+            <div className="svc-img" data-anim={i === 1 ? "wipe-right" : "wipe-left"}>
               {s.reveal ? (
                 <RevealImage src={s.image} alt={s.alt} claySrc={s.clay} sizes="(max-width: 819px) 100vw, 660px" />
               ) : (
                 <Image src={s.image} alt={s.alt} fill sizes="(max-width: 819px) 100vw, 660px" />
               )}
-              <a className="pill pill-light" href="#contact">Explore work ➔</a>
+              <a className="pill pill-light" href="#contact">Explore work&nbsp;<span className="arr">➔</span></a>
             </div>
             <div className="svc-text">
               <div className="svc-head">
-                {s.ruleFirst && <span className="rule" />}
-                <h3>{s.title}</h3>
-                {!s.ruleFirst && <span className="rule" />}
+                {s.ruleFirst && <span className="rule" data-anim="grow" style={{ "--d": "0.5s" }} />}
+                <h3 data-anim="fade-up" style={{ "--d": "0.25s" }}>{s.title}</h3>
+                {!s.ruleFirst && <span className="rule" data-anim="grow" style={{ "--d": "0.5s" }} />}
               </div>
-              <p>{s.text}</p>
+              <p data-anim="fade-up" style={{ "--d": "0.4s" }}>{s.text}</p>
             </div>
           </article>
         ))}

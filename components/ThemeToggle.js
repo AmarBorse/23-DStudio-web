@@ -26,6 +26,8 @@ export default function ThemeToggle() {
   return (
     <button
       className={`theme-toggle${night ? " is-night" : ""}`}
+      data-anim="fade-down"
+      style={{ "--d": "0.52s" }}
       onClick={toggle}
       aria-label={night ? "Switch to day mode" : "Switch to night mode"}
       title={night ? "Day mode" : "Night mode"}

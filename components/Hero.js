@@ -135,7 +135,7 @@ export default function Hero() {
       </div>
 
       <div className="wrap">
-        <a href="#top" aria-label="23D Studio home">
+        <a href="#top" aria-label="23D Studio home" data-anim="fade-down" style={{ "--d": "0.1s" }}>
           <Image className="nav-logo logo-day" src="/images/logo-black.png" alt="23D Studio" width={320} height={302} priority />
           <Image className="nav-logo logo-night" src="/images/logo-white.png" alt="" aria-hidden="true" width={320} height={303} priority />
         </a>
@@ -151,18 +151,18 @@ export default function Hero() {
         </button>
 
         <ul className={`nav-links${menuOpen ? " open" : ""}`} id="nav">
-          {links.map((l) => (
-            <li key={l.label}>
+          {links.map((l, i) => (
+            <li key={l.label} data-anim="fade-down" style={{ "--d": `${0.2 + i * 0.08}s` }}>
               <a href={l.href} onClick={closeMenu}>{l.label}</a>
             </li>
           ))}
           <li className="m-cta">
-            <a className="pill pill-dark" href="#contact" onClick={closeMenu}>Start the Project➔</a>
+            <a className="pill pill-dark" href="#contact" onClick={closeMenu}>Start the Project<span className="arr">➔</span></a>
           </li>
         </ul>
 
         <ThemeToggle />
-        <a className="pill pill-dark nav-cta" href="#contact">Start the Project➔</a>
+        <a className="pill pill-dark nav-cta" href="#contact" data-anim="fade-down" style={{ "--d": "0.6s" }}>Start the Project<span className="arr">➔</span></a>
 
         <a className={`to-top${floating ? " floating" : ""}`} href="#top" aria-label="Back to top">
           <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
@@ -171,7 +171,7 @@ export default function Hero() {
         </a>
       </div>
 
-      <div className="hero-dots">
+      <div className="hero-dots" data-anim="fade" style={{ "--d": "0.9s" }}>
         {slides.map((s, i) => (
           <button
             key={s.src}
