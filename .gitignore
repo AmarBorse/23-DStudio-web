@@ -1,7 +1,4 @@
 node_modules
 .next
 out
-.env
-.env.local
-public/sitemap*.xml
-public/robots.txt
+.DS_Store
