@@ -894,3 +894,12 @@ html.anim .who-divider[data-anim][data-in]{scale:1 1}
 .cf-note.failed{color:#b3261e}
 .cf-note a{color:inherit;text-decoration:underline}
 .cf-submit:disabled{opacity:.7;cursor:wait}
+
+/* project photos that open the project link */
+.pd-img-link{position:relative;display:block;cursor:pointer}
+.pd-img-hint{position:absolute;right:calc(16 * var(--u));bottom:calc(16 * var(--u));padding:calc(8 * var(--u)) calc(16 * var(--u));border-radius:999px;
+  background:rgba(255,255,255,.92);color:var(--ink);font-family:var(--arial);font-size:calc(12 * var(--u));opacity:0;translate:0 6px;transition:opacity .3s,translate .3s}
+.pd-img-link:hover .pd-img-hint,.pd-img-link:focus-visible .pd-img-hint{opacity:1;translate:0 0}
+.pd-img-link:focus-visible{outline:2px solid #a9784d;outline-offset:4px}
+@media (hover: none){.pd-img-hint{opacity:1;translate:0 0}}
+@media (max-width: 819px){.pd-img-hint{right:12px;bottom:12px;padding:7px 14px;font-size:13px}}

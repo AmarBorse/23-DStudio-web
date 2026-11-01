@@ -21,6 +21,17 @@ function videoEmbed(link) {
   return null;
 }
 
+// When the project has a link (YouTube, VR tour, Google Drive…), its photos open that link in a new tab
+function Linked({ href, label, children }) {
+  if (!href) return children;
+  return (
+    <a className="pd-img-link" href={href} target="_blank" rel="noopener noreferrer" aria-label={`Open ${label} (opens in a new tab)`}>
+      {children}
+      <span className="pd-img-hint" aria-hidden="true">Open project ↗</span>
+    </a>
+  );
+}
+
 export default function ProjectDetail({ project }) {
   const [cover, ...gallery] = project.images;
   const paragraphs = (project.description || "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
@@ -44,7 +55,9 @@ export default function ProjectDetail({ project }) {
           <h1 className="pd-title" data-anim="fade-up" style={{ "--d": "0.1s" }}>{project.title}</h1>
 
           <div className="pd-cover" data-anim="wipe-left" style={{ "--d": "0.2s" }}>
-            <Image src={cover.src} alt={cover.alt} width={cover.w} height={cover.h} sizes="(max-width: 819px) 100vw, 1220px" priority />
+            <Linked href={project.link} label={project.title}>
+              <Image src={cover.src} alt={cover.alt} width={cover.w} height={cover.h} sizes="(max-width: 819px) 100vw, 1220px" priority />
+            </Linked>
           </div>
 
           {paragraphs.length > 0 && (
@@ -70,10 +83,11 @@ export default function ProjectDetail({ project }) {
 
           {gallery.map((img) => (
             <div className="pd-image" key={img.src} data-anim="fade-up">
-              <Image src={img.src} alt={img.alt} width={img.w} height={img.h} sizes="(max-width: 819px) 100vw, 1220px" />
+              <Linked href={project.link} label={project.title}>
+                <Image src={img.src} alt={img.alt} width={img.w} height={img.h} sizes="(max-width: 819px) 100vw, 1220px" />
+              </Linked>
             </div>
           ))}
-
         </div>
       </main>
 

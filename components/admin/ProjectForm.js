@@ -64,7 +64,7 @@ export default function ProjectForm({ project }) {
           <span className="adm-prefix"><span>/work/</span><input name="slug" value={slug} onChange={(e) => { setSlug(slugify(e.target.value)); setSlugTouched(true); }} /></span>
         </label>
         <label>
-          Project link <span className="adm-muted">(optional — YouTube or Vimeo videos play on the page; other links show a button)</span>
+          Project link <span className="adm-muted">(optional — YouTube, VR tour, Google Drive… Clicking the project’s photos opens this link)</span>
           <input name="link" type="url" placeholder="https://" defaultValue={project?.link || ""} />
         </label>
         <label className="adm-wide">
