@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 // TODO: replace "#" with the studio's real profile links
 const social = [
@@ -8,9 +9,9 @@ const social = [
 ];
 
 const pages = [
-  { label: "work", href: "#services" },
-  { label: "Services", href: "#services" },
-  { label: "About us", href: "#about" },
+  { label: "work", href: "/#services" },
+  { label: "Services", href: "/#services" },
+  { label: "About us", href: "/about" },
   { label: "Contact us", href: "#contact" },
 ];
 
@@ -22,7 +23,7 @@ export default function Footer() {
 
         <ul className="f-col nav" data-anim="fade-up" style={{ "--d": "0.1s" }}>
           {pages.map((p) => (
-            <li key={p.label}><a href={p.href}>{p.label}</a></li>
+            <li key={p.label}><Link href={p.href}>{p.label}</Link></li>
           ))}
         </ul>
 
