@@ -9,7 +9,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 // Links go through "/" so they also work from the About page.
 const links = [
   { label: "Work", href: "/#services" },
-  { label: "Services", href: "/#services" },
+  { label: "Services", href: "/services" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "#contact" }, // the footer is on every page
 ];
