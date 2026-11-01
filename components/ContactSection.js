@@ -38,6 +38,7 @@ export default function ContactSection() {
   const [sent, setSent] = useState(false);
 
   const set = (k) => (e) => {
+    setSent(false);
     setForm((f) => ({ ...f, [k]: e.target.value }));
     if (errors[k]) setErrors((er) => ({ ...er, [k]: undefined }));
   };
@@ -51,21 +52,34 @@ export default function ContactSection() {
     return er;
   };
 
-  // No server on this site: the form opens the visitor's email app with everything filled in.
-  // To receive messages directly instead, connect a form service (e.g. Formspree) here.
-  const onSubmit = (e) => {
+  // Saves the message for the admin Enquiries box (/admin/enquiries)
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
+  const onSubmit = async (e) => {
     e.preventDefault();
     const er = validate();
     setErrors(er);
+    setSendError("");
     if (Object.keys(er).length) {
       document.getElementById(`cf-${Object.keys(er)[0]}`)?.focus();
       return;
     }
-    const details = [`Name: ${form.name.trim()}`, `Email: ${form.email.trim()}`, form.phone.trim() && `Phone: ${form.phone.trim()}`].filter(Boolean);
-    const subject = `Project enquiry from ${form.name.trim()}`;
-    const body = `${details.join("\n")}\n\n${form.message.trim()}`;
-    window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setSent(true);
+    setSending(true);
+    try {
+      const res = await fetch("/api/enquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, website: e.currentTarget.website?.value || "" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Sorry, your message could not be sent.");
+      setSent(true);
+      setForm(empty);
+    } catch (err) {
+      setSendError(err.message);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -142,22 +156,29 @@ export default function ContactSection() {
               })}
             </div>
 
+            {/* hidden from people; bots that fill it in are ignored */}
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" className="cf-hp" aria-hidden="true" />
+
             <div className="cf-actions" data-anim="fade-up" style={{ "--d": "0.85s" }}>
-              <button type="submit" className="pill pill-dark cf-submit">
-                <span>Send Message</span>
+              <button type="submit" className="pill pill-dark cf-submit" disabled={sending}>
+                <span>{sending ? "Sending…" : "Send Message"}</span>
                 <span className="arr">➔</span>
               </button>
-              <p className={`cf-note${sent ? " sent" : ""}`} role="status">
+              <p className={`cf-note${sent ? " sent" : ""}${sendError ? " failed" : ""}`} role="status">
                 {sent ? (
                   <>
                     <svg viewBox="0 0 20 20" aria-hidden="true">
                       <circle cx="10" cy="10" r="9" />
                       <path d="M5.8 10.3l2.7 2.7 5.7-5.9" />
                     </svg>
-                    Your email app is open with the message ready — just press send.
+                    Thank you — your message has been sent. We will get back to you soon.
+                  </>
+                ) : sendError ? (
+                  <>
+                    {sendError} You can also email us at&nbsp;<a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
                   </>
                 ) : (
-                  "This opens your email app with your message filled in."
+                  "We will reply to the email address you enter."
                 )}
               </p>
             </div>

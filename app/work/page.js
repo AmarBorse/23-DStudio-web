@@ -1,5 +1,6 @@
 import PageHero from "@/components/PageHero";
 import WorkGallery from "@/components/WorkGallery";
+import { getCategoriesWithProjects } from "@/lib/content";
 import Footer from "@/components/Footer";
 import ChatButton from "@/components/ChatButton";
 import Animations from "@/components/Animations";
@@ -9,7 +10,11 @@ export const metadata = {
   description: "Selected architectural visualisation, walkthrough and virtual reality projects by 23D Studio, Nashik.",
 };
 
-export default function WorkPage() {
+// Refreshed instantly when a project is saved in the admin; this is a fallback
+export const revalidate = 3600;
+
+export default async function WorkPage() {
+  const groups = await getCategoriesWithProjects();
   return (
     <>
       <PageHero
@@ -24,7 +29,7 @@ export default function WorkPage() {
         mobileSize={16.5}
       />
       <main>
-        <WorkGallery />
+        <WorkGallery groups={groups} />
       </main>
       <Footer />
       <ChatButton />

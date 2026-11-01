@@ -3,6 +3,7 @@ import AboutIntro from "@/components/AboutIntro";
 import VisionMission from "@/components/VisionMission";
 import WhoWeWorkWith from "@/components/WhoWeWorkWith";
 import Team from "@/components/Team";
+import { getTeamMembers } from "@/lib/content";
 import Footer from "@/components/Footer";
 import ChatButton from "@/components/ChatButton";
 import Animations from "@/components/Animations";
@@ -13,7 +14,10 @@ export const metadata = {
     "23D Studio is an architectural visualisation studio established in 2022, based in Nashik, Maharashtra, creating renders, walkthroughs and virtual reality tours.",
 };
 
-export default function AboutPage() {
+export const revalidate = 3600;
+
+export default async function AboutPage() {
+  const team = await getTeamMembers();
   return (
     <>
       <PageHero
@@ -30,7 +34,7 @@ export default function AboutPage() {
         <AboutIntro />
         <VisionMission />
         <WhoWeWorkWith />
-        <Team />
+        {team.length > 0 && <Team team={team} />}
       </main>
       <Footer />
       <ChatButton />

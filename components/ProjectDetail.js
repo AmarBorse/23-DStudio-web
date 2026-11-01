@@ -3,8 +3,28 @@ import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
 import ToTop from "@/components/ToTop";
 
+// YouTube / Vimeo links become an embedded player; any other link becomes a button
+function videoEmbed(link) {
+  try {
+    const u = new URL(link);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") return `https://www.youtube-nocookie.com/embed/${u.pathname.slice(1)}`;
+    if (host.endsWith("youtube.com")) {
+      const id = u.searchParams.get("v") || u.pathname.split("/").filter(Boolean).pop();
+      if (id) return `https://www.youtube-nocookie.com/embed/${id}`;
+    }
+    if (host.endsWith("vimeo.com")) {
+      const id = u.pathname.split("/").filter(Boolean).find((x) => /^\d+$/.test(x));
+      if (id) return `https://player.vimeo.com/video/${id}`;
+    }
+  } catch {}
+  return null;
+}
+
 export default function ProjectDetail({ project }) {
   const [cover, ...gallery] = project.images;
+  const paragraphs = (project.description || "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const embed = project.link ? videoEmbed(project.link) : null;
   return (
     <>
       <header className="hero pd-head">
@@ -27,11 +47,24 @@ export default function ProjectDetail({ project }) {
             <Image src={cover.src} alt={cover.alt} width={cover.w} height={cover.h} sizes="(max-width: 819px) 100vw, 1220px" priority />
           </div>
 
-          {project.description.length > 0 && (
+          {paragraphs.length > 0 && (
             <div className="pd-text" data-anim="fade-up">
-              {project.description.map((para, i) => (
+              {paragraphs.map((para, i) => (
                 <p key={i}>{para}</p>
               ))}
+            </div>
+          )}
+
+          {project.link && !embed && (
+            <p className="pd-link" data-anim="fade-up">
+              <a className="pill pill-dark" href={project.link} target="_blank" rel="noopener noreferrer">
+                View project<span className="arr">➔</span>
+              </a>
+            </p>
+          )}
+          {embed && (
+            <div className="pd-video" data-anim="fade-up">
+              <iframe src={embed} title={`${project.title} — video`} loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
             </div>
           )}
 

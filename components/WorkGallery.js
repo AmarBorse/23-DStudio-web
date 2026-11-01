@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { categories } from "@/components/projects";
 
 // Our Work — one tab bar; each tab shows only its own projects. Clicking a project opens its page.
-// Projects are listed in components/projects.js. The tab is kept in the address (/work#walkthroughs).
-const groups = categories;
+// Projects come from the admin (/admin/projects). The tab is kept in the address (/work#walkthroughs).
 
-export default function WorkGallery() {
+export default function WorkGallery({ groups }) {
   const [active, setActive] = useState(groups[0].id);
   const tabRefs = useRef({});
 
@@ -22,7 +20,7 @@ export default function WorkGallery() {
     fromHash();
     window.addEventListener("hashchange", fromHash);
     return () => window.removeEventListener("hashchange", fromHash);
-  }, []);
+  }, [groups]);
 
   const select = (id, focus = false) => {
     setActive(id);
@@ -71,6 +69,7 @@ export default function WorkGallery() {
 
         {/* key makes the panel re-mount, so its fade-in plays on every tab change */}
         <div className={`wk-panel wk-${group.id}`} id="wk-panel" role="tabpanel" aria-labelledby={`tab-${group.id}`} key={group.id}>
+          {group.projects.length === 0 && <p className="wk-empty">New projects coming soon.</p>}
           <div className="wk-grid">
             {group.projects.map((p, i) => (
               <figure className="wk-item" key={p.slug} style={{ "--i": i }}>
