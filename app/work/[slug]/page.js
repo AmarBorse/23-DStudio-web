@@ -3,12 +3,11 @@ import ProjectDetail from "@/components/ProjectDetail";
 import Footer from "@/components/Footer";
 import ChatButton from "@/components/ChatButton";
 import Animations from "@/components/Animations";
-import { getCategoriesWithProjects, getPublishedProject } from "@/lib/content";
+import { getProjectPageSlugs, getPublishedProject } from "@/lib/content";
 
 // Pages for existing projects are built ahead; new ones (added in the admin) are built on first visit.
 export async function generateStaticParams() {
-  const groups = await getCategoriesWithProjects();
-  return groups.flatMap((g) => g.projects.map((p) => ({ slug: p.slug })));
+  return (await getProjectPageSlugs()).map((slug) => ({ slug }));
 }
 export const revalidate = 3600;
 

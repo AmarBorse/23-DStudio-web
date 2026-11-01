@@ -10,7 +10,10 @@ create table if not exists projects (
   link text not null default '',
   images jsonb not null default '[]',
   published boolean not null default true,
-  sort integer not null default 0
+  sort integer not null default 0,
+  caption text not null default '',
+  card_image jsonb,
+  has_page boolean
 );
 
 create table if not exists team (

@@ -5,6 +5,7 @@ import { projects } from "@/lib/store";
 import { CATEGORIES } from "@/lib/categories";
 import { deleteProject, toggleProject } from "@/app/admin/actions";
 import ConfirmButton from "@/components/admin/ConfirmButton";
+import { cardImage, cardHref, hasPage } from "@/lib/projectRules";
 
 export default async function ProjectsAdmin({ searchParams }) {
   await requireAdmin();
@@ -26,12 +27,12 @@ export default async function ProjectsAdmin({ searchParams }) {
             <ul className="adm-list">
               {list.map((p) => (
                 <li key={p.id} className="adm-card adm-row">
-                  <div className="adm-thumb">{p.images?.[0] && <Image src={p.images[0].src} alt="" fill sizes="96px" />}</div>
+                  <div className="adm-thumb">{cardImage(p) && <Image src={cardImage(p).src} alt="" fill sizes="96px" />}</div>
                   <div className="adm-grow">
                     <strong>{p.title}</strong>
                     <div className="adm-muted">
-                      /work/{p.slug} · {p.images?.length || 0} image{p.images?.length === 1 ? "" : "s"}
-                      {p.link && " · has link"}
+                      {hasPage(p) ? `/work/${p.slug} · ${p.images?.length || 0} image${p.images?.length === 1 ? "" : "s"}` : "Opens the project link"}
+                      {hasPage(p) && p.link && " · photos open the link"}
                     </div>
                   </div>
                   <span className={`adm-pill ${p.published ? "live" : "draft"}`}>{p.published ? "Live" : "Hidden"}</span>
@@ -42,7 +43,7 @@ export default async function ProjectsAdmin({ searchParams }) {
                       <input type="hidden" name="published" value={String(!p.published)} />
                       <button className="adm-btn ghost" type="submit">{p.published ? "Hide" : "Publish"}</button>
                     </form>
-                    {p.published && <a className="adm-btn ghost" href={`/work/${p.slug}`} target="_blank" rel="noopener noreferrer">View ↗</a>}
+                    {p.published && cardHref(p) && <a className="adm-btn ghost" href={cardHref(p)} target="_blank" rel="noopener noreferrer">View ↗</a>}
                     <form action={deleteProject}>
                       <input type="hidden" name="id" value={p.id} />
                       <ConfirmButton message={`Delete “${p.title}”? This cannot be undone.`}>Delete</ConfirmButton>

@@ -29,41 +29,44 @@ export async function saveProject(_prev, formData) {
   await requireAdmin();
   const id = String(formData.get("id") || "");
   const title = String(formData.get("title") || "").trim();
+  const caption = String(formData.get("caption") || "").trim();
   const category = String(formData.get("category") || "");
   const description = String(formData.get("description") || "").trim();
   const link = String(formData.get("link") || "").trim();
   const published = formData.get("published") === "on";
+  const has_page = formData.get("has_page") === "on";
   const sort = Number(formData.get("sort") || 0) || 0;
   let slug = slugify(String(formData.get("slug") || "") || title);
-  let images = [];
-  try {
-    images = JSON.parse(String(formData.get("images") || "[]"));
-  } catch {}
+  const parse = (k, fallback) => {
+    try {
+      return JSON.parse(String(formData.get(k) || "")) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  const cleanImage = (im) => (im?.src ? { src: String(im.src), w: Number(im.w) || 1600, h: Number(im.h) || 900, alt: String(im.alt || title) } : null);
+  const images = parse("images", []).map(cleanImage).filter(Boolean);
+  const card_image = cleanImage(parse("card_image", null));
 
-  if (!title) return { error: "Please enter a project title." };
-  if (!CATEGORIES.some((c) => c.id === category)) return { error: "Please choose a category." };
-  if (!images.length) return { error: "Please add at least one image (the first one is the cover)." };
+  if (!title) return { error: "Please enter a project name." };
+  if (!CATEGORIES.some((c) => c.id === category)) return { error: "Please choose a service (Our Work tab)." };
   if (link && !/^https?:\/\/\S+$/i.test(link)) return { error: "The project link must start with http:// or https://" };
-  if (!slug) return { error: "Please enter a web address for the project." };
+  if (has_page && !images.length) return { error: "Please add a main image for the project page." };
+  if (!has_page && !link) return { error: "Without a project page, please add a project link (or tick “Create a project page”)." };
+  if (!card_image && !images.length) return { error: "Please add an Our Work page image." };
+  if (!slug) return { error: "Please enter a page address." };
 
   const clash = await projects.get("slug", slug);
   if (clash && clash.id !== id) slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
 
-  const row = {
-    title,
-    slug,
-    category,
-    description,
-    link,
-    published,
-    sort,
-    images: images.map((im) => ({ src: String(im.src), w: Number(im.w) || 1600, h: Number(im.h) || 900, alt: String(im.alt || title) })),
-  };
+  const row = { title, caption, slug, category, description, link, published, has_page, sort, images, card_image };
   try {
     if (id) await projects.update(id, row);
     else await projects.insert(row);
   } catch (e) {
     console.error(e);
+    const msg = String(e.message || "");
+    if (/column|card_image|has_page|caption/i.test(msg)) return { error: "The database needs the latest update: run supabase/update-2.sql in the Supabase SQL Editor." };
     return { error: "Could not save. Is the database connected?" };
   }
   refreshPublicPages();

@@ -10,7 +10,6 @@ export default async function EditProject({ params }) {
   if (!project) notFound();
   return (
     <>
-      <h1 className="adm-h1">Edit project</h1>
       <ProjectForm project={project} />
     </>
   );

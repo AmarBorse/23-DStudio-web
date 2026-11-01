@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { cardCaption, cardHref, cardImage, hasPage } from "@/lib/projectRules";
 
 // Our Work — one tab bar; each tab shows only its own projects. Clicking a project opens its link or its page.
 // Projects come from the admin (/admin/projects). The tab is kept in the address (/work#walkthroughs).
@@ -10,15 +11,17 @@ import Link from "next/link";
 // A project with a link (YouTube, VR tour, Google Drive…) opens that link straight away in a new tab;
 // a project without one opens its own page on this site.
 function ProjectLink({ project, children }) {
-  if (project.link) {
+  const href = cardHref(project);
+  if (!href) return <div className="wk-link">{children}</div>;
+  if (!hasPage(project)) {
     return (
-      <a href={project.link} className="wk-link" target="_blank" rel="noopener noreferrer" aria-label={`${project.title} (opens in a new tab)`}>
+      <a href={href} className="wk-link" target="_blank" rel="noopener noreferrer" aria-label={`${cardCaption(project)} (opens in a new tab)`}>
         {children}
       </a>
     );
   }
   return (
-    <Link href={`/work/${project.slug}`} className="wk-link">
+    <Link href={href} className="wk-link">
       {children}
     </Link>
   );
@@ -92,12 +95,14 @@ export default function WorkGallery({ groups }) {
               <figure className="wk-item" key={p.slug} style={{ "--i": i }}>
                 <ProjectLink project={p}>
                   <div className="wk-img">
-                    <Image src={p.images[0].src} alt={p.images[0].alt} fill sizes="(max-width: 819px) 100vw, 900px" priority={group.id === groups[0].id} />
+                    {cardImage(p) && (
+                      <Image src={cardImage(p).src} alt={cardImage(p).alt || cardCaption(p)} fill sizes="(max-width: 819px) 100vw, 900px" priority={group.id === groups[0].id} />
+                    )}
                     <span className="wk-view" aria-hidden="true">
-                      {p.link ? <>Open project ↗</> : <>View project<span className="arr">➔</span></>}
+                      {hasPage(p) ? <>View project<span className="arr">➔</span></> : <>Open project ↗</>}
                     </span>
                   </div>
-                  <figcaption>{p.title}</figcaption>
+                  <figcaption>{cardCaption(p)}</figcaption>
                 </ProjectLink>
               </figure>
             ))}

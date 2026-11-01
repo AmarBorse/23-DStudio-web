@@ -2,9 +2,9 @@
 
 The admin lives at **/admin** (e.g. `https://your-site.vercel.app/admin`). From there you can:
 
-- **Projects** — add, edit, hide or delete projects: title, category, description, a project link
-  (YouTube/Vimeo links play on the project page; other links show a "View project" button) and images
-  (the first image is the cover).
+- **Projects** — add, edit, hide or delete projects. The form has: Fill from a PDF (optional), basic details
+  (name, card caption, service tab, project link), card image, and "Create a project page" (main image,
+  description, gallery, page address). Without a project page, clicking the project opens its link directly.
 - **Team** — add, edit or remove people in "Our Team" on the About page, with photo and role.
 - **Enquiries** — every message sent from the Contact page, newest first. Mark as read, reply by email, delete.
 
@@ -32,6 +32,10 @@ Vercel → your project → **Settings → Environment Variables**, add these fo
 | `SUPABASE_SERVICE_ROLE_KEY` | from step 1 |
 
 Then **Deployments → … → Redeploy** so the new settings are used.
+
+## Updates
+
+If your database was set up before the new project form, run `supabase/update-2.sql` once in the Supabase SQL Editor.
 
 ## On your computer
 
