@@ -9,7 +9,7 @@ const social = [
 ];
 
 const pages = [
-  { label: "work", href: "/#services" },
+  { label: "work", href: "/work" },
   { label: "Services", href: "/services" },
   { label: "About us", href: "/about" },
   { label: "Contact us", href: "#contact" },

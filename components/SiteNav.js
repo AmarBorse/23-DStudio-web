@@ -6,9 +6,9 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 
 // Top navigation, shared by every page (sits inside the hero's .wrap).
-// Links go through "/" so they also work from the About page.
+// Page links; "Contact" jumps to the footer, which is on every page.
 const links = [
-  { label: "Work", href: "/#services" },
+  { label: "Work", href: "/work" },
   { label: "Services", href: "/services" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "#contact" }, // the footer is on every page
