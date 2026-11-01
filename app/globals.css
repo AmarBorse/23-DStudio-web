@@ -683,3 +683,118 @@ html.anim .who-divider[data-anim][data-in]{scale:1 1}
   .wk-vr .wk-img{height:auto;aspect-ratio:637.5/343.2}
   .wk-item figcaption,.wk-visualisation figcaption,.wk-walkthroughs figcaption,.wk-vr figcaption{position:static;margin-top:8px;font-size:14px;line-height:1.4;white-space:normal}
 }
+
+
+/* =====================================================================
+   CONTACT PAGE  (app/contact/page.js, components/ContactSection.js)
+   The PDF only shows the hero; this section follows the site's grid, type and colours.
+   ===================================================================== */
+.ct{position:relative;background:#fff8f1;padding:calc(84 * var(--u)) 0 calc(104 * var(--u));overflow:hidden}
+.ct .wrap{height:auto}
+.ct-card{display:grid;grid-template-columns:calc(340 * var(--u)) 1fr;margin-left:calc(95.2 * var(--u));width:calc(871.7 * var(--u));
+  background:#fff;box-shadow:0 calc(30 * var(--u)) calc(60 * var(--u)) calc(-30 * var(--u)) rgba(55,48,43,.28)}
+
+/* left panel */
+.ct-info{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:calc(40 * var(--u));min-height:calc(470 * var(--u));
+  padding:calc(44 * var(--u)) calc(38 * var(--u)) calc(40 * var(--u));background:#7d6241;color:#fff;overflow:hidden;isolation:isolate}
+.ct-plan{position:absolute;right:calc(-90 * var(--u));bottom:calc(-70 * var(--u));width:calc(340 * var(--u));aspect-ratio:425/520;z-index:-1;
+  background:url("/images/about-floorplan.png") center / contain no-repeat;filter:invert(1);opacity:.32;animation:ctDrift 18s ease-in-out infinite alternate}
+@keyframes ctDrift{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(calc(-22 * var(--u)),calc(-18 * var(--u))) rotate(-4deg)}}
+.ct-kicker{font-weight:800;font-size:calc(10.5 * var(--u));letter-spacing:.22em;text-transform:uppercase;color:#ecdcc6}
+.ct-title{margin-top:calc(12 * var(--u));font-weight:800;font-size:calc(26 * var(--u));line-height:1.2}
+.ct-intro{margin-top:calc(14 * var(--u));font-size:calc(13.5 * var(--u));line-height:1.6;color:#f3e9dd}
+.ct-email{position:relative;display:inline-block;font-weight:800;font-size:calc(19 * var(--u));color:#fff}
+.ct-email::after{content:"";position:absolute;left:0;bottom:calc(-3 * var(--u));width:100%;height:1px;background:currentColor;transform:scaleX(.25);transform-origin:left;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.ct-email:hover::after{transform:scaleX(1)}
+.ct-location{margin-top:calc(12 * var(--u));font-size:calc(13.5 * var(--u));color:#f3e9dd}
+.ct-social{display:flex;gap:calc(12 * var(--u));margin-top:calc(22 * var(--u));list-style:none}
+.ct-social a{display:grid;place-items:center;width:calc(42 * var(--u));height:calc(42 * var(--u));border:1px solid rgba(255,255,255,.55);border-radius:50%;color:#fff;
+  transition:background .25s,color .25s,border-color .25s,transform .25s}
+.ct-social a:hover{background:#fff;border-color:#fff;color:#7d6241;transform:translateY(calc(-3 * var(--u)))}
+.ct-social svg{width:calc(17 * var(--u));height:calc(17 * var(--u))}
+
+/* right panel: form with floating labels */
+.cf{padding:calc(44 * var(--u)) calc(50 * var(--u)) calc(40 * var(--u));color:#000}
+.cf-head{font-weight:800;font-size:calc(18 * var(--u));color:#000}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:calc(26 * var(--u)) calc(30 * var(--u));margin-top:calc(26 * var(--u))}
+.cf-field{position:relative;padding-top:calc(16 * var(--u))}
+.cf-field.wide{grid-column:1/-1}
+.cf-field input,.cf-field textarea{display:block;width:100%;padding:calc(8 * var(--u)) 0;border:0;border-bottom:1px solid #cfc6bd;border-radius:0;background:transparent;
+  font:inherit;font-size:calc(14.5 * var(--u));color:#000;outline:none;transition:border-color .25s}
+.cf-field textarea{resize:vertical;min-height:calc(104 * var(--u));line-height:1.5}
+.cf-field label{position:absolute;left:0;top:calc(24 * var(--u));font-size:calc(14 * var(--u));color:#8b8178;pointer-events:none;transform-origin:left top;
+  transition:transform .3s cubic-bezier(.2,.7,.2,1),color .3s,top .3s cubic-bezier(.2,.7,.2,1)}
+.cf-field input:focus + label,.cf-field input:not(:placeholder-shown) + label,
+.cf-field textarea:focus + label,.cf-field textarea:not(:placeholder-shown) + label{top:0;transform:scale(.8);color:#7d6241;font-weight:800;letter-spacing:.03em}
+/* underline that draws in from the left on focus */
+.cf-field::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#a9784d;transform:scaleX(0);transform-origin:left;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.cf-field:has(textarea)::after{bottom:calc(6 * var(--u))}
+.cf-field:focus-within::after{transform:scaleX(1)}
+.cf-field.has-error input,.cf-field.has-error textarea{border-bottom-color:#b3261e}
+.cf-field.has-error label{color:#b3261e}
+.cf-field.has-error{animation:cfShake .4s}
+@keyframes cfShake{20%,60%{translate:-4px 0}40%,80%{translate:4px 0}}
+.cf-error{margin-top:calc(6 * var(--u));font-size:calc(11.5 * var(--u));color:#b3261e;animation:cfIn .3s ease both}
+@keyframes cfIn{from{opacity:0;translate:0 -4px}}
+
+.cf-actions{display:flex;align-items:center;gap:calc(20 * var(--u));margin-top:calc(30 * var(--u))}
+.cf-submit{position:relative;overflow:hidden;gap:calc(8 * var(--u));height:calc(42 * var(--u));padding:0 calc(26 * var(--u));border:0;cursor:pointer;font-size:calc(12.5 * var(--u))}
+.cf-submit .arr{display:inline-block;transition:transform .3s}
+.cf-submit:hover .arr{transform:translateX(calc(4 * var(--u)))}
+.cf-submit::before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);transition:left .6s}
+.cf-submit:hover::before{left:120%}
+.cf-submit:focus-visible{outline:2px solid #a9784d;outline-offset:3px}
+.cf-note{display:flex;align-items:center;gap:calc(8 * var(--u));font-size:calc(11.5 * var(--u));color:#6f665f}
+.cf-note svg{flex:none;width:calc(18 * var(--u));height:calc(18 * var(--u));fill:none;stroke:#3f8a5a;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.cf-note svg circle{stroke-dasharray:57;stroke-dashoffset:57;animation:cfDraw .5s ease forwards}
+.cf-note svg path{stroke-dasharray:14;stroke-dashoffset:14;animation:cfDraw .35s .45s ease forwards}
+@keyframes cfDraw{to{stroke-dashoffset:0}}
+.cf-note.sent{color:#2f6b45;animation:cfIn .4s ease both}
+
+@media (prefers-reduced-motion: reduce){
+  .ct-plan,.cf-field.has-error,.cf-error,.cf-note.sent{animation:none}
+  .cf-note svg circle,.cf-note svg path{animation:none;stroke-dashoffset:0}
+}
+
+[data-theme="dark"] .ct{background:#0d0c0b}
+[data-theme="dark"] .ct-card{background:#1b1917;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+[data-theme="dark"] .ct-info{background:#4b3b29}
+[data-theme="dark"] .ct-social a:hover{color:#4b3b29}
+[data-theme="dark"] .cf,[data-theme="dark"] .cf-head{color:#f4eee7}
+[data-theme="dark"] .cf-field input,[data-theme="dark"] .cf-field textarea{color:#f4eee7;border-bottom-color:#4a433d}
+[data-theme="dark"] .cf-field label{color:#9d938a}
+[data-theme="dark"] .cf-field input:focus + label,[data-theme="dark"] .cf-field input:not(:placeholder-shown) + label,
+[data-theme="dark"] .cf-field textarea:focus + label,[data-theme="dark"] .cf-field textarea:not(:placeholder-shown) + label{color:#d0a77f}
+[data-theme="dark"] .cf-field::after{background:#d0a77f}
+[data-theme="dark"] .cf-note{color:#a79d93}
+[data-theme="dark"] .cf-note.sent{color:#8fd1a6}
+[data-theme="dark"] .cf-error,[data-theme="dark"] .cf-field.has-error label{color:#f2a49c}
+
+@media (max-width: 819px){
+  .ct{padding:36px 0 52px}
+  .ct-card{grid-template-columns:1fr;margin-left:0;width:100%}
+  .ct-info{min-height:0;gap:34px;padding:32px 24px 30px}
+  .ct-plan{width:240px;right:-70px;bottom:-60px}
+  .ct-kicker{font-size:11px}
+  .ct-title{font-size:24px}
+  .ct-intro,.ct-location{font-size:15px}
+  .ct-email{font-size:19px}
+  .ct-email::after{bottom:-3px}
+  .ct-social{gap:12px;margin-top:20px}
+  .ct-social a{width:44px;height:44px}
+  .ct-social a:hover{transform:translateY(-3px)}
+  .ct-social svg{width:18px;height:18px}
+  .cf{padding:30px 24px 32px}
+  .cf-head{font-size:19px}
+  .cf-grid{grid-template-columns:1fr;gap:22px;margin-top:18px}
+  .cf-field{padding-top:16px}
+  .cf-field input,.cf-field textarea{padding:10px 0;font-size:16px}
+  .cf-field textarea{min-height:120px}
+  .cf-field:has(textarea)::after{bottom:6px}
+  .cf-field label{top:26px;font-size:15px}
+  .cf-error,.cf-note{font-size:13px}
+  .cf-actions{flex-direction:column;align-items:flex-start;gap:14px;margin-top:28px}
+  .cf-submit{height:48px;padding:0 30px;font-size:15px;gap:8px}
+  .cf-submit:hover .arr{transform:translateX(4px)}
+  .cf-note svg{width:18px;height:18px}
+}

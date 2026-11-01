@@ -6,12 +6,12 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 
 // Top navigation, shared by every page (sits inside the hero's .wrap).
-// Page links; "Contact" jumps to the footer, which is on every page.
+// Page links, shared by every page.
 const links = [
   { label: "Work", href: "/work" },
   { label: "Services", href: "/services" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "#contact" }, // the footer is on every page
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function SiteNav({ current }) {
@@ -45,12 +45,12 @@ export default function SiteNav({ current }) {
           </li>
         ))}
         <li className="m-cta">
-          <a className="pill pill-dark" href="#contact" onClick={closeMenu}>Start the Project<span className="arr">➔</span></a>
+          <Link className="pill pill-dark" href="/contact" onClick={closeMenu}>Start the Project<span className="arr">➔</span></Link>
         </li>
       </ul>
 
       <ThemeToggle />
-      <a className="pill pill-dark nav-cta" href="#contact" data-anim="fade-down" style={{ "--d": "0.6s" }}>Start the Project<span className="arr">➔</span></a>
+      <Link className="pill pill-dark nav-cta" href="/contact" data-anim="fade-down" style={{ "--d": "0.6s" }}>Start the Project<span className="arr">➔</span></Link>
     </>
   );
 }

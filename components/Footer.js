@@ -1,18 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
+import { SOCIAL } from "@/components/contactInfo";
 
-// TODO: replace "#" with the studio's real profile links
 const social = [
-  { label: "Facebook", href: "#" },
-  { label: "Instagram", href: "#" },
-  { label: "Pintrest", href: "#" },
+  { label: "Facebook", href: SOCIAL.facebook },
+  { label: "Instagram", href: SOCIAL.instagram },
+  { label: "Pintrest", href: SOCIAL.pinterest }, // TODO: real link in contactInfo.js
 ];
 
 const pages = [
   { label: "work", href: "/work" },
   { label: "Services", href: "/services" },
   { label: "About us", href: "/about" },
-  { label: "Contact us", href: "#contact" },
+  { label: "Contact us", href: "/contact" },
 ];
 
 export default function Footer() {
@@ -33,8 +33,7 @@ export default function Footer() {
           ))}
         </ul>
 
-        {/* TODO: replace with the studio's real email or a contact page */}
-        <a className="pill f-cta" href="mailto:hello@23dstudio.com" data-anim="fade-up" style={{ "--d": "0.3s" }}>Start the Project<span className="arr">➔</span></a>
+        <Link className="pill f-cta" href="/contact" data-anim="fade-up" style={{ "--d": "0.3s" }}>Start the Project<span className="arr">➔</span></Link>
 
         <h2 className="f-head" data-anim="fade-up" style={{ "--d": "0.2s" }}>Let&apos;s Visualise It Together.</h2>
         <p className="f-text" data-anim="fade-up" style={{ "--d": "0.3s" }}>

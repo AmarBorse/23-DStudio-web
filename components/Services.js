@@ -52,7 +52,7 @@ export default function Services() {
               ) : (
                 <Image src={s.image} alt={s.alt} fill sizes="(max-width: 819px) 100vw, 660px" />
               )}
-              <a className="pill pill-light" href="#contact">Explore work&nbsp;<span className="arr">➔</span></a>
+              <a className="pill pill-light" href="/work">Explore work&nbsp;<span className="arr">➔</span></a>
             </div>
             <div className="svc-text">
               <div className="svc-head">
