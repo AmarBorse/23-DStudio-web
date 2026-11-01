@@ -40,9 +40,9 @@ export default function Footer() {
           Whether you are an architect, interior designer, builder or developer, let&apos;s bring your next project to life
           through meaningful visual experiences.
         </p>
-        <div className="f-rule" />
-        <p className="f-copy">© 2026 <span>23D Studio. All Rights Reserved.</span></p>
-        <p className="f-credit">Website design &amp; Manege by 23Dbranding</p>
+        <div className="f-rule" data-anim="grow" style={{ "--d": "0.2s" }} />
+        <p className="f-copy" data-anim="fade" style={{ "--d": "0.35s" }}>© 2026 <span>23D Studio. All Rights Reserved.</span></p>
+        <p className="f-credit" data-anim="fade" style={{ "--d": "0.45s" }}>Website design &amp; Manege by 23Dbranding</p>
       </div>
     </footer>
   );
