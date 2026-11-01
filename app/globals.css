@@ -798,3 +798,72 @@ html.anim .who-divider[data-anim][data-in]{scale:1 1}
   .cf-submit:hover .arr{transform:translateX(4px)}
   .cf-note svg{width:18px;height:18px}
 }
+
+
+/* ---------- Work page: project links ---------- */
+.wk-link{display:block;color:inherit}
+.wk-view{position:absolute;left:50%;top:50%;z-index:1;display:inline-flex;gap:8px;align-items:center;padding:calc(9 * var(--u)) calc(18 * var(--u));border-radius:999px;
+  background:rgba(255,255,255,.92);color:var(--ink);font-family:var(--arial);font-size:calc(12 * var(--u));white-space:nowrap;
+  opacity:0;translate:-50% calc(-50% + 10px);transition:opacity .35s,translate .35s cubic-bezier(.2,.7,.2,1)}
+.wk-img::after{content:"";position:absolute;inset:0;background:rgba(30,24,20,.28);opacity:0;transition:opacity .35s}
+.wk-link:hover .wk-view,.wk-link:focus-visible .wk-view{opacity:1;translate:-50% -50%}
+.wk-link:hover .wk-img::after,.wk-link:focus-visible .wk-img::after{opacity:1}
+.wk-link:focus-visible{outline:2px solid #a9784d;outline-offset:4px}
+@media (max-width: 819px){.wk-view{display:none}}
+
+
+/* =====================================================================
+   PROJECT DETAIL PAGE  (app/work/[slug]/page.js, components/ProjectDetail.js)
+   Layout follows the client's reference: title, large cover, text, stacked images, call to action.
+   ===================================================================== */
+.hero.pd-head{height:calc(150 * var(--u));background:#fff}
+.hero.pd-head::before{display:none}
+.pd{background:#fff;color:#000;padding-bottom:calc(80 * var(--u))}
+.pd .wrap{height:auto;padding:0 calc(57.6 * var(--u))}
+.pd-crumbs{display:flex;justify-content:center;gap:calc(10 * var(--u));font-size:calc(12 * var(--u));color:#8b8178}
+.pd-crumbs a{color:#8b8178;transition:color .2s}
+.pd-crumbs a:hover{color:#a9784d}
+.pd-crumbs a:last-child{color:#a9784d;font-weight:800}
+.pd-title{margin-top:calc(10 * var(--u));text-align:center;font-weight:800;font-size:calc(30 * var(--u));line-height:1.2;letter-spacing:.06em;text-transform:uppercase;color:#000}
+.pd-cover{margin-top:calc(30 * var(--u));overflow:hidden;background:#e5e5e5}
+.pd-cover img,.pd-image img{display:block;width:100%;height:auto}
+.pd-cover img{animation:pdZoom 1.6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes pdZoom{from{transform:scale(1.06)}to{transform:scale(1)}}
+.pd-text{max-width:calc(640 * var(--u));margin-top:calc(26 * var(--u));font-size:calc(15 * var(--u));line-height:1.65;color:#37302b}
+.pd-text p + p{margin-top:calc(12 * var(--u))}
+.pd-image{margin-top:calc(60 * var(--u));background:#e5e5e5}
+
+
+.pd-cta{position:relative;overflow:hidden;padding:calc(110 * var(--u)) 0;background:#1d1915;text-align:center;isolation:isolate}
+.pd-cta-bg{object-fit:cover;z-index:-2;opacity:.45;filter:grayscale(.3)}
+.pd-cta::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 40%,rgba(29,25,21,.2),rgba(29,25,21,.85) 75%)}
+.pd-cta .wrap{height:auto;display:flex;flex-direction:column;align-items:center}
+.pd-cta-title{font-family:var(--spartan);font-weight:700;font-size:calc(58 * var(--u));line-height:1.05;color:#fff}
+.pd-cta-btn{margin-top:calc(26 * var(--u));gap:8px;height:calc(42 * var(--u));padding:0 calc(26 * var(--u));background:#fff;color:var(--ink);font-size:calc(12.5 * var(--u))}
+.pd-cta-btn .arr{transition:transform .3s}
+.pd-cta-btn:hover{background:#a9784d;color:#fff}
+.pd-cta-btn:hover .arr{transform:translateX(4px)}
+
+@media (prefers-reduced-motion: reduce){.pd-cover img{animation:none}}
+
+[data-theme="dark"] .hero.pd-head,[data-theme="dark"] .pd{background:#121110}
+[data-theme="dark"] .pd,[data-theme="dark"] .pd-title{color:#f4eee7}
+[data-theme="dark"] .pd-text{color:#d8cfc5}
+[data-theme="dark"] .pd-crumbs a:last-child{color:#d0a77f}
+[data-theme="dark"] .pd-cover,[data-theme="dark"] .pd-image{background:#222}
+[data-theme="dark"] .pd-cta-btn{background:#fff;color:#37302b}
+[data-theme="dark"] .pd-cta-btn:hover{background:#d0a77f;color:#1b1714}
+
+@media (max-width: 819px){
+  .hero.pd-head{height:96px;min-height:0}
+  .pd{padding-bottom:56px}
+  .pd .wrap{padding:0 22px}
+  .pd-crumbs{font-size:13px;gap:8px;flex-wrap:wrap}
+  .pd-title{font-size:24px;margin-top:8px}
+  .pd-cover{margin:22px -22px 0}
+  .pd-text{margin-top:20px;font-size:16px}
+  .pd-image{margin:28px -22px 0}
+  .pd-cta{padding:70px 0}
+  .pd-cta-title{font-size:34px;padding:0 10px}
+  .pd-cta-btn{height:46px;padding:0 28px;font-size:15px;margin-top:22px}
+}

@@ -2,33 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { categories } from "@/components/projects";
 
-// Our Work — one tab bar; each tab shows only its own projects.
-// Add or remove projects here. The tab is also kept in the address (/work#walkthroughs) so it can be shared.
-const groups = [
-  {
-    id: "visualisation",
-    label: "Architectural Visualisation",
-    projects: [
-      { title: "Bed room", image: "/images/work-bedroom.jpg", alt: "Interior render of a bedroom with a study desk and warm cove lighting" },
-      { title: "Bungalow", image: "/images/work-bungalow.jpg", alt: "Exterior render of a white bungalow with a cantilevered balcony among trees" },
-      { title: "012 Bungalow", image: "/images/work-012-bungalow.jpg", alt: "Exterior render of a two-storey bungalow with timber fins and a white car" },
-    ],
-  },
-  {
-    id: "walkthroughs",
-    label: "Architectural Walkthroughs",
-    projects: [
-      { title: "Shrinathji old age home by TCL", image: "/images/work-old-age-home.jpg", alt: "Exterior render of the Shrinathji old age home with a landscaped lawn" },
-      { title: "Row house project in Malegoan", image: "/images/work-row-house.jpg", alt: "Exterior render of row houses with palm trees in Malegaon" },
-    ],
-  },
-  {
-    id: "vr",
-    label: "Virtual Reality Tours",
-    projects: [{ title: "Town Project.", image: "/images/work-town.jpg", alt: "Aerial render of a riverside township under clouds" }],
-  },
-];
+// Our Work — one tab bar; each tab shows only its own projects. Clicking a project opens its page.
+// Projects are listed in components/projects.js. The tab is kept in the address (/work#walkthroughs).
+const groups = categories;
 
 export default function WorkGallery() {
   const [active, setActive] = useState(groups[0].id);
@@ -94,11 +73,14 @@ export default function WorkGallery() {
         <div className={`wk-panel wk-${group.id}`} id="wk-panel" role="tabpanel" aria-labelledby={`tab-${group.id}`} key={group.id}>
           <div className="wk-grid">
             {group.projects.map((p, i) => (
-              <figure className="wk-item" key={p.title} style={{ "--i": i }}>
-                <div className="wk-img">
-                  <Image src={p.image} alt={p.alt} fill sizes="(max-width: 819px) 100vw, 900px" priority={group.id === groups[0].id} />
-                </div>
-                <figcaption>{p.title}</figcaption>
+              <figure className="wk-item" key={p.slug} style={{ "--i": i }}>
+                <Link href={`/work/${p.slug}`} className="wk-link">
+                  <div className="wk-img">
+                    <Image src={p.images[0].src} alt={p.images[0].alt} fill sizes="(max-width: 819px) 100vw, 900px" priority={group.id === groups[0].id} />
+                    <span className="wk-view" aria-hidden="true">View project<span className="arr">➔</span></span>
+                  </div>
+                  <figcaption>{p.title}</figcaption>
+                </Link>
               </figure>
             ))}
           </div>
