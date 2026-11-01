@@ -870,20 +870,7 @@ html.anim .who-divider[data-anim][data-in]{scale:1 1}
 
 
 /* ---------- Services: walkthrough clips (components/ClipSequence.js) ---------- */
-.sv-banner:has(.clips){z-index:2} /* above the text layer so the pause button can be clicked */
 .clips{position:absolute;inset:0;background:#1d1915}
-.clips-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease}
+.clips-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease;pointer-events:none}
 .clips-video.on{opacity:1}
-.clips-bar{position:absolute;left:calc(73.6 * var(--u));right:calc(73.6 * var(--u));bottom:calc(22 * var(--u));display:flex;gap:6px;z-index:1}
-.clips-bar span{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35);overflow:hidden}
-.clips-bar i{display:block;height:100%;background:#fff;transform-origin:left;transition:transform .25s linear}
-.clips-toggle{position:absolute;right:calc(73.6 * var(--u));bottom:calc(36 * var(--u));z-index:1;display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:50%;
-  background:rgba(255,255,255,.85);color:var(--ink);cursor:pointer;transition:background .2s,transform .2s}
-.clips-toggle:hover{background:#fff;transform:scale(1.06)}
-.clips-toggle:focus-visible{outline:2px solid #fff;outline-offset:3px}
-.clips-toggle svg{width:16px;height:16px;fill:currentColor}
 @media (prefers-reduced-motion: reduce){.clips-video{transition:none}}
-@media (max-width: 819px){
-  .clips-bar{left:16px;right:16px;bottom:12px}
-  .clips-toggle{right:16px;bottom:24px;width:38px;height:38px}
-}
