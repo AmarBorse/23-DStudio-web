@@ -4,8 +4,25 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-// Our Work — one tab bar; each tab shows only its own projects. Clicking a project opens its page.
+// Our Work — one tab bar; each tab shows only its own projects. Clicking a project opens its link or its page.
 // Projects come from the admin (/admin/projects). The tab is kept in the address (/work#walkthroughs).
+
+// A project with a link (YouTube, VR tour, Google Drive…) opens that link straight away in a new tab;
+// a project without one opens its own page on this site.
+function ProjectLink({ project, children }) {
+  if (project.link) {
+    return (
+      <a href={project.link} className="wk-link" target="_blank" rel="noopener noreferrer" aria-label={`${project.title} (opens in a new tab)`}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={`/work/${project.slug}`} className="wk-link">
+      {children}
+    </Link>
+  );
+}
 
 export default function WorkGallery({ groups }) {
   const [active, setActive] = useState(groups[0].id);
@@ -73,13 +90,15 @@ export default function WorkGallery({ groups }) {
           <div className="wk-grid">
             {group.projects.map((p, i) => (
               <figure className="wk-item" key={p.slug} style={{ "--i": i }}>
-                <Link href={`/work/${p.slug}`} className="wk-link">
+                <ProjectLink project={p}>
                   <div className="wk-img">
                     <Image src={p.images[0].src} alt={p.images[0].alt} fill sizes="(max-width: 819px) 100vw, 900px" priority={group.id === groups[0].id} />
-                    <span className="wk-view" aria-hidden="true">View project<span className="arr">➔</span></span>
+                    <span className="wk-view" aria-hidden="true">
+                      {p.link ? <>Open project ↗</> : <>View project<span className="arr">➔</span></>}
+                    </span>
                   </div>
                   <figcaption>{p.title}</figcaption>
-                </Link>
+                </ProjectLink>
               </figure>
             ))}
           </div>
