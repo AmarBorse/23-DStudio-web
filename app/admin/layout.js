@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { isAdmin } from "@/lib/auth";
-import { backend } from "@/lib/store";
-import { enquiries } from "@/lib/store";
+import { backend, enquiries } from "@/lib/store";
 import { logout } from "@/app/admin/actions";
+import AdminNav from "@/components/admin/AdminNav";
 import "./admin.css";
 
 export const metadata = { title: "Admin — 23D Studio", robots: { index: false, follow: false } };
@@ -25,14 +25,7 @@ export default async function AdminLayout({ children }) {
           <Image src="/images/logo-white.png" alt="23D Studio" width={44} height={42} />
           <span>Admin</span>
         </Link>
-        <nav className="adm-nav">
-          <Link href="/admin">Dashboard</Link>
-          <Link href="/admin/projects">Projects</Link>
-          <Link href="/admin/team">Team</Link>
-          <Link href="/admin/enquiries">
-            Enquiries {unread > 0 && <span className="adm-badge">{unread}</span>}
-          </Link>
-        </nav>
+        <AdminNav unread={unread} />
         <div className="adm-side-foot">
           <a href="/" target="_blank" rel="noopener noreferrer">View website ↗</a>
           <form action={logout}>

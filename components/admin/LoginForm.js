@@ -9,8 +9,8 @@ export default function LoginForm() {
     <form action={action} className="adm-card adm-login-form">
       <label htmlFor="password">Password</label>
       <input id="password" name="password" type="password" autoComplete="current-password" required autoFocus />
-      {state?.error && <p className="adm-error" role="alert">{state.error}</p>}
-      <button className="adm-btn" type="submit" disabled={pending}>{pending ? "Checking…" : "Log in"}</button>
+      {state?.error && <p className="adm-error shake" role="alert" key={Date.now()}>{state.error}</p>}
+      <button className={`adm-btn${pending ? " is-busy" : ""}`} type="submit" disabled={pending}>{pending ? "Checking…" : "Log in"}</button>
     </form>
   );
 }

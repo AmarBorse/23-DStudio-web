@@ -175,7 +175,7 @@ function PdfFill({ onUse }) {
             ))}
           </ul>
           <div className="adm-inline">
-            <button type="button" className="adm-btn" onClick={use} disabled={applying || !picked.some(Boolean)}>{applying ? "Uploading pages…" : "Use these"}</button>
+            <button type="button" className={`adm-btn${applying ? " is-busy" : ""}`} onClick={use} disabled={applying || !picked.some(Boolean)}>{applying ? "Uploading pages…" : "Use these"}</button>
             <button type="button" className="adm-btn ghost" onClick={() => setResult(null)} disabled={applying}>Cancel</button>
           </div>
         </div>
@@ -305,7 +305,7 @@ export default function ProjectForm({ project }) {
         {project?.published && (
           <a className="adm-btn ghost" href={projectHasPage(project) ? `/work/${project.slug}` : project.link} target="_blank" rel="noopener noreferrer">View page ↗</a>
         )}
-        <button className="adm-btn pf-save" type="submit" disabled={pending}>{pending ? "Saving…" : "Save project"}</button>
+        <button className={`adm-btn pf-save${pending ? " is-busy" : ""}`} type="submit" disabled={pending}>{pending ? "Saving…" : "Save project"}</button>
       </div>
     </form>
   );

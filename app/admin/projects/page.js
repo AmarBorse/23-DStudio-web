@@ -17,7 +17,7 @@ export default async function ProjectsAdmin({ searchParams }) {
         <h1 className="adm-h1">Projects</h1>
         <Link className="adm-btn" href="/admin/projects/new">+ Add project</Link>
       </div>
-      {saved && <p className="adm-ok" role="status">Saved. The website is updated.</p>}
+      {saved && <p className="adm-ok adm-toast" role="status">Saved. The website is updated.</p>}
       {CATEGORIES.map((c) => {
         const list = rows.filter((p) => p.category === c.id);
         return (

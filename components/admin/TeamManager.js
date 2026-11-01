@@ -41,8 +41,9 @@ function MemberForm({ member, nextSort, onDone }) {
         <label className="adm-small">Order<input name="sort" type="number" defaultValue={member?.sort ?? nextSort} /></label>
       </div>
       {(err || state?.error) && <p className="adm-error" role="alert">{err || state.error}</p>}
+      {state?.ok && !member && <p className="adm-ok adm-toast" role="status" key={state.at}>Saved. The About page is updated.</p>}
       <div className="adm-inline">
-        <button className="adm-btn" type="submit" disabled={pending || busy}>{pending ? "Saving…" : member ? "Save" : "Add member"}</button>
+        <button className={`adm-btn${pending ? " is-busy" : ""}`} type="submit" disabled={pending || busy}>{pending ? "Saving…" : member ? "Save" : "Add member"}</button>
         {member && <button type="button" className="adm-btn ghost" onClick={onDone}>Cancel</button>}
       </div>
     </form>

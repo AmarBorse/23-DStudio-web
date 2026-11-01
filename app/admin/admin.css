@@ -158,3 +158,69 @@
   .pf-actions{justify-content:stretch}
   .pf-actions > *{flex:1}
 }
+
+/* ---------- navigation: icons + highlighted current section ---------- */
+.adm-nav a{position:relative;justify-content:flex-start;gap:10px;color:#cfc5ba;transition:background .2s,color .2s}
+.adm-nav a svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.adm-nav a .adm-badge{margin-left:auto}
+.adm-nav a:hover{color:#fff}
+.adm-nav a.active{background:rgba(255,255,255,.1);color:#fff;font-weight:700}
+.adm-nav a::before{content:"";position:absolute;left:-16px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:#d0a77f;transform:scaleY(0);transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.adm-nav a.active::before{transform:scaleY(1)}
+.adm-sub{margin:-12px 0 20px}
+.adm-login-logo{display:block;margin:0 auto 14px}
+.adm-row-link{text-decoration:none;color:inherit}
+
+/* ---------- interaction details ---------- */
+.adm-card{transition:border-color .2s,box-shadow .25s,transform .25s}
+.adm-stat:hover,.adm-row-link:hover,.adm-member:hover{transform:translateY(-2px);box-shadow:0 10px 24px -14px rgba(33,28,24,.35)}
+.adm-row:hover{border-color:#d6ccc1}
+.adm-btn{transition:opacity .2s,background .2s,color .2s,border-color .2s,transform .15s}
+.adm-btn:active:not(:disabled){transform:scale(.97)}
+.adm-thumb img,.adm-member img,.pf-thumb img,.adm-image img{transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.adm-row:hover .adm-thumb img,.adm-member:hover img,.pf-thumb:hover img{transform:scale(1.05)}
+.adm-thumb,.adm-member,.pf-thumb{overflow:hidden}
+.adm-badge{animation:admPop .5s cubic-bezier(.3,1.6,.5,1) both}
+
+/* button loading spinner */
+.adm-btn.is-busy{position:relative;color:transparent !important;pointer-events:none;opacity:1}
+.adm-btn.is-busy::after{content:"";position:absolute;inset:0;margin:auto;width:16px;height:16px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:admSpin .7s linear infinite}
+.adm-btn.ghost.is-busy::after{border-color:rgba(33,28,24,.25);border-top-color:var(--a-text)}
+@keyframes admSpin{to{transform:rotate(360deg)}}
+
+/* "Saved" message: slides in, fades away after a few seconds */
+.adm-toast{animation:admToast 5s ease both}
+@keyframes admToast{0%{opacity:0;transform:translateY(-8px)}6%,85%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+.adm-error.shake{animation:admShake .4s}
+@keyframes admShake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+
+/* ---------- entrance animations (each admin page) ---------- */
+html.anim .adm-main > *,html.anim .pf > *{animation:admIn .5s cubic-bezier(.2,.7,.2,1) both}
+html.anim .adm-main > *:nth-child(2),html.anim .pf > *:nth-child(2){animation-delay:.05s}
+html.anim .adm-main > *:nth-child(3),html.anim .pf > *:nth-child(3){animation-delay:.1s}
+html.anim .adm-main > *:nth-child(4),html.anim .pf > *:nth-child(4){animation-delay:.15s}
+html.anim .adm-main > *:nth-child(5),html.anim .pf > *:nth-child(5){animation-delay:.2s}
+html.anim .adm-main > *:nth-child(n+6),html.anim .pf > *:nth-child(n+6){animation-delay:.25s}
+html.anim .adm-list > li,html.anim .adm-team > li,html.anim .adm-stats > *{animation:admIn .45s cubic-bezier(.2,.7,.2,1) both}
+html.anim .adm-list > li:nth-child(2),html.anim .adm-team > li:nth-child(2),html.anim .adm-stats > *:nth-child(2){animation-delay:.06s}
+html.anim .adm-list > li:nth-child(3),html.anim .adm-team > li:nth-child(3),html.anim .adm-stats > *:nth-child(3){animation-delay:.12s}
+html.anim .adm-list > li:nth-child(4),html.anim .adm-team > li:nth-child(4){animation-delay:.18s}
+html.anim .adm-list > li:nth-child(5),html.anim .adm-team > li:nth-child(5){animation-delay:.24s}
+html.anim .adm-list > li:nth-child(n+6),html.anim .adm-team > li:nth-child(n+6){animation-delay:.3s}
+html.anim .pf-thumb,html.anim .adm-image{animation:admPop .35s cubic-bezier(.2,.7,.2,1) both}
+html.anim .pf-pdf-result{animation:admIn .4s ease both}
+html.anim .adm-guest .adm-login{animation:admIn .6s cubic-bezier(.2,.7,.2,1) both}
+html.anim .adm-side{animation:admSide .5s cubic-bezier(.2,.7,.2,1) both}
+@keyframes admIn{from{opacity:0;transform:translateY(12px)}}
+@keyframes admPop{from{opacity:0;transform:scale(.92)}}
+@keyframes admSide{from{opacity:0;transform:translateX(-12px)}}
+
+@media (prefers-reduced-motion: reduce){
+  .adm-toast,.adm-error.shake,.adm-badge{animation:none}
+  .adm-btn.is-busy::after{animation-duration:1.6s}
+}
+@media (max-width: 800px){
+  .adm-nav a::before{left:0;top:auto;bottom:0;right:0;width:auto;height:2px;transform:scaleX(0)}
+  .adm-nav a.active::before{transform:scaleX(1)}
+  .adm-nav a svg{display:none}
+}
