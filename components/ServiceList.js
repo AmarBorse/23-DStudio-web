@@ -1,7 +1,8 @@
 import Image from "next/image";
+import ClipSequence from "@/components/ClipSequence";
 
 // Services page content. Edit text, lists and images here.
-// The first service has a photo collage; the others have one wide image above the text.
+// The first service has a photo collage; the others have one wide image (or a sequence of video clips) above the text.
 export const visualisation = {
   number: "01",
   title: "Architectural Visualisation",
@@ -32,8 +33,10 @@ export const others = [
     ],
     offer: ["Exterior Walkthroughs", "Interior Walkthroughs", "Residential Project Animations", "Commercial Project Animations"],
     columns: 2,
-    image: "/images/services-walkthrough.jpg",
-    alt: "Interior render of a bedroom with timber wall panels and a walk-in wardrobe",
+    image: "/images/services-walkthrough-poster.jpg",
+    alt: "Walkthrough animation of a bedroom with timber wall panels and a walk-in wardrobe",
+    // Clips play in this order, then start again from the first
+    videos: ["/videos/walkthrough-1.mp4", "/videos/walkthrough-2.mp4", "/videos/walkthrough-3.mp4"],
   },
   {
     key: "vr",
@@ -101,7 +104,11 @@ export function ServiceSection({ s }) {
   return (
     <section className={`sv sv-wide sv-${s.key}`} aria-labelledby={`sv-${s.number}`}>
       <div className="sv-banner" data-anim="wipe-left">
-        <Image src={s.image} alt={s.alt} fill sizes="100vw" />
+        {s.videos ? (
+          <ClipSequence clips={s.videos} poster={s.image} label={s.alt} />
+        ) : (
+          <Image src={s.image} alt={s.alt} fill sizes="100vw" />
+        )}
       </div>
       <div className="wrap">
         <h2 className="sv-title" id={`sv-${s.number}`} data-anim="fade-up" style={{ "--d": "0.1s" }}>
