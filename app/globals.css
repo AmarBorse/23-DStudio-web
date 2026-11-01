@@ -622,54 +622,62 @@ html.anim .who-divider[data-anim][data-in]{scale:1 1}
 
 /* =====================================================================
    WORK PAGE  (app/work/page.js, components/WorkGallery.js)
+   One tab bar (positions from the PDF); the panel below shows the chosen category only.
    ===================================================================== */
-.wk{position:relative;background:#fff;color:#000;overflow:hidden;scroll-margin-top:0}
-.wk-visualisation{height:calc(459 * var(--u))}
-.wk-walkthroughs{height:calc(456 * var(--u))}
-.wk-vr{height:calc(462 * var(--u))}
-.wk-tabs ul{list-style:none}
-.wk-tabs li{position:absolute;top:calc(55 * var(--u))}
-.wk-visualisation .wk-tabs li{top:calc(58.4 * var(--u))}
+.wk{position:relative;background:#fff;color:#000;padding-bottom:calc(26.4 * var(--u));min-height:calc(462 * var(--u))}
+.wk .wrap{height:auto}
+.wk-panel{padding-top:calc(145.8 * var(--u))}
+.wk-tabs{position:absolute;inset:0 0 auto 0}
+.wk-tab{position:absolute;top:calc(58.4 * var(--u));padding:0;border:0;background:none;cursor:pointer;font:inherit;
+  font-size:calc(16 * var(--u));line-height:calc(20 * var(--u));color:#000;white-space:nowrap;transition:color .25s}
 .wk-tab-visualisation{left:calc(329.3 * var(--u))}
 .wk-tab-walkthroughs{left:calc(574.4 * var(--u))}
 .wk-tab-vr{left:calc(812.6 * var(--u))}
-.wk-tabs a{display:block;font-size:calc(16 * var(--u));line-height:calc(20 * var(--u));color:#000;white-space:nowrap;transition:color .25s}
-.wk-tabs a:hover{color:#a9784d}
-.wk-tabs a.active{font-weight:800;color:#a9784d}
-.wk-rule{position:absolute;left:calc(254.4 * var(--u));width:calc(712.5 * var(--u));top:calc(95.5 * var(--u));height:1px;background:var(--ink)}
-.wk-visualisation .wk-rule{top:calc(98.8 * var(--u))}
-.wk-grid{position:absolute;display:grid}
-.wk-item{position:relative}
+.wk-tab:hover{color:#a9784d}
+.wk-tab.active{font-weight:800;color:#a9784d}
+/* small dot in front of the active tab */
+.wk-tab::before{content:"";position:absolute;left:calc(-12 * var(--u));top:50%;width:calc(5 * var(--u));height:calc(5 * var(--u));margin-top:calc(-2.5 * var(--u));
+  border-radius:50%;background:currentColor;opacity:0;scale:0;transition:opacity .25s,scale .25s}
+.wk-tab.active::before{opacity:1;scale:1}
+.wk-tab:focus-visible{outline:2px solid #a9784d;outline-offset:4px}
+.wk-rule{position:absolute;left:calc(254.4 * var(--u));width:calc(712.5 * var(--u));top:calc(98.8 * var(--u));height:1px;background:var(--ink)}
+
+.wk-grid{display:grid}
+.wk-item{position:relative;animation:wkIn .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * .08s)}
+@keyframes wkIn{from{opacity:0;translate:0 14px}to{opacity:1;translate:0 0}}
 .wk-img{position:relative;overflow:hidden;background:#e5e5e5}
 .wk-img img{object-fit:cover;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
 .wk-item:hover .wk-img img{transform:scale(1.035)}
 .wk-item figcaption{color:#000;white-space:nowrap}
 
-.wk-visualisation .wk-grid{left:calc(57.6 * var(--u));top:calc(145.8 * var(--u));grid-template-columns:repeat(3,calc(292.8 * var(--u)));column-gap:calc(20.4 * var(--u))}
+.wk-visualisation .wk-grid{margin-left:calc(57.6 * var(--u));grid-template-columns:repeat(3,calc(292.8 * var(--u)));column-gap:calc(20.4 * var(--u))}
 .wk-visualisation .wk-img{height:calc(270.8 * var(--u))}
 .wk-visualisation figcaption{margin-top:calc(5 * var(--u));font-size:calc(8.66 * var(--u));line-height:calc(11 * var(--u))}
 
-.wk-walkthroughs .wk-grid{left:calc(57.6 * var(--u));top:calc(148.8 * var(--u));grid-template-columns:repeat(2,calc(447 * var(--u)));column-gap:calc(15.2 * var(--u))}
+.wk-walkthroughs .wk-grid{margin:calc(5.8 * var(--u)) 0 0 calc(57.6 * var(--u));grid-template-columns:repeat(2,calc(447 * var(--u)));column-gap:calc(15.2 * var(--u))}
 .wk-walkthroughs .wk-img{height:calc(251.2 * var(--u))}
 .wk-walkthroughs figcaption{margin-top:calc(9.7 * var(--u));font-size:calc(13 * var(--u));line-height:calc(16 * var(--u))}
 
-.wk-vr .wk-grid{left:calc(329.3 * var(--u));top:calc(115.5 * var(--u));grid-template-columns:calc(637.5 * var(--u))}
+.wk-vr .wk-grid{margin:calc(-27.5 * var(--u)) 0 0 calc(329.3 * var(--u));grid-template-columns:calc(637.5 * var(--u))}
 .wk-vr .wk-img{height:calc(343.2 * var(--u))}
 .wk-vr figcaption{position:absolute;left:calc(-98.9 * var(--u));top:calc(309.2 * var(--u));font-size:calc(13 * var(--u));line-height:calc(16 * var(--u))}
 
+@media (prefers-reduced-motion: reduce){.wk-item{animation:none}}
+
 [data-theme="dark"] .wk{background:#121110}
-[data-theme="dark"] .wk-tabs a,[data-theme="dark"] .wk-item figcaption{color:#ece4da}
-[data-theme="dark"] .wk-tabs a.active,[data-theme="dark"] .wk-tabs a:hover{color:#d0a77f}
+[data-theme="dark"] .wk-tab,[data-theme="dark"] .wk-item figcaption{color:#ece4da}
+[data-theme="dark"] .wk-tab.active,[data-theme="dark"] .wk-tab:hover{color:#d0a77f}
 [data-theme="dark"] .wk-img{background:#222}
 
 @media (max-width: 819px){
-  .wk-visualisation,.wk-walkthroughs,.wk-vr{height:auto;padding:30px 0 40px}
+  .wk{padding:30px 0 44px;min-height:0}
+  .wk-panel{padding-top:0}
   .wk .wrap{display:flex;flex-direction:column}
-  .wk-tabs ul{display:flex;flex-wrap:wrap;gap:2px 20px}
-  .wk-tabs li,.wk-visualisation .wk-tabs li{position:static}
-  .wk-tabs a{font-size:15px;line-height:1.4;padding:6px 0}
-  .wk-rule,.wk-visualisation .wk-rule{position:relative;left:auto;top:auto;width:100%;margin:8px 0 22px}
-  .wk-grid,.wk-visualisation .wk-grid,.wk-walkthroughs .wk-grid,.wk-vr .wk-grid{position:relative;left:auto;top:auto;grid-template-columns:1fr;row-gap:22px}
+  .wk-tabs{position:relative;inset:auto;display:flex;flex-wrap:wrap;gap:4px 22px;padding-left:12px}
+  .wk-tab,.wk-tab-visualisation,.wk-tab-walkthroughs,.wk-tab-vr{position:relative;left:auto;top:auto;font-size:15px;line-height:1.4;padding:6px 0}
+  .wk-tab::before{left:-11px;width:5px;height:5px;margin-top:-2.5px}
+  .wk-rule{position:relative;left:auto;top:auto;width:100%;margin:8px 0 22px}
+  .wk-visualisation .wk-grid,.wk-walkthroughs .wk-grid,.wk-vr .wk-grid{margin:0;grid-template-columns:1fr;row-gap:22px}
   .wk-visualisation .wk-img{height:auto;aspect-ratio:292.8/270.8}
   .wk-walkthroughs .wk-img{height:auto;aspect-ratio:447/251.2}
   .wk-vr .wk-img{height:auto;aspect-ratio:637.5/343.2}
