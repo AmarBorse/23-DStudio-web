@@ -3,7 +3,9 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, startSession, endSession, requireAdmin, loginConfigured } from "@/lib/auth";
-import { projects, team, enquiries } from "@/lib/store";
+import { projects, team, enquiries, quotations } from "@/lib/store";
+import { nextQuoteNumber, todayISO, addDays } from "@/lib/quote";
+import { QUOTE_DEFAULTS } from "@/lib/company";
 import { CATEGORIES } from "@/lib/categories";
 import { refreshPublicPages } from "@/lib/revalidate";
 
@@ -132,4 +134,94 @@ export async function deleteEnquiry(formData) {
   await enquiries.remove(String(formData.get("id")));
   revalidatePath("/admin/enquiries");
   revalidatePath("/admin");
+}
+
+/* ---------- quotations ---------- */
+const QUOTE_STATUS_IDS = ["draft", "sent", "accepted", "rejected"];
+
+export async function saveQuote(_prev, formData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const text = (k, max = 2000) => String(formData.get(k) || "").trim().slice(0, max);
+  const money = (v) => Math.max(0, Math.round((Number(v) || 0) * 100) / 100);
+  let items = [];
+  try {
+    items = JSON.parse(String(formData.get("items") || "[]"));
+  } catch {}
+  items = items
+    .map((it) => ({ description: String(it.description || "").trim().slice(0, 1000), qty: money(it.qty), unit: String(it.unit || "").trim().slice(0, 20), rate: money(it.rate) }))
+    .filter((it) => it.description);
+
+  const row = {
+    number: text("number", 30),
+    quote_date: text("quote_date", 10) || null,
+    valid_till: text("valid_till", 10) || null,
+    customer_id: text("customer_id", 30),
+    client_name: text("client_name", 200),
+    client_address: text("client_address", 500),
+    client_phone: text("client_phone", 40),
+    client_email: text("client_email", 200),
+    prepared_by_name: text("prepared_by_name", 120),
+    prepared_by_phone: text("prepared_by_phone", 40),
+    project_overview: text("project_overview", 1000),
+    items,
+    gst_enabled: formData.get("gst_enabled") === "on",
+    gst_percent: money(formData.get("gst_percent")),
+    discount: money(formData.get("discount")),
+    terms: text("terms", 5000),
+    closing: text("closing", 300),
+    notes: text("notes", 2000),
+    status: QUOTE_STATUS_IDS.includes(text("status")) ? text("status") : "draft",
+  };
+  if (!row.number) return { error: "Please enter a quote number." };
+  if (!row.client_name) return { error: "Please enter the client’s name (Contact Person)." };
+  if (!items.length) return { error: "Please add at least one item with a description." };
+  if (!row.quote_date) return { error: "Please choose the quote date." };
+
+  let saved;
+  try {
+    const same = (await quotations.list()).find((x) => x.number === row.number && x.id !== id);
+    if (same) return { error: `Quote number ${row.number} is already used (client: ${same.client_name}). Please use another number.` };
+    saved = id ? await quotations.update(id, row) : await quotations.insert(row);
+  } catch (e) {
+    console.error(e);
+    if (/quotations|relation|column/i.test(String(e.message))) return { error: "The database needs the quotations update: run supabase/update-3.sql in the Supabase SQL Editor." };
+    return { error: "Could not save. Is the database connected?" };
+  }
+  revalidatePath("/admin/quotations");
+  revalidatePath("/admin");
+  redirect(formData.get("then") === "print" ? `/admin/quotations/${saved.id}/print` : "/admin/quotations?saved=1");
+}
+
+export async function setQuoteStatus(formData) {
+  await requireAdmin();
+  const status = String(formData.get("status"));
+  if (!QUOTE_STATUS_IDS.includes(status)) return;
+  await quotations.update(String(formData.get("id")), { status });
+  revalidatePath("/admin/quotations");
+}
+
+export async function deleteQuote(formData) {
+  await requireAdmin();
+  await quotations.remove(String(formData.get("id")));
+  revalidatePath("/admin/quotations");
+  revalidatePath("/admin");
+}
+
+export async function duplicateQuote(formData) {
+  await requireAdmin();
+  const q = await quotations.get("id", String(formData.get("id")));
+  if (!q) return;
+  const all = await quotations.list();
+  const { id: _id, created_at: _c, ...rest } = q;
+  const today = todayISO();
+  const copy = await quotations.insert({
+    ...rest,
+    number: nextQuoteNumber(all),
+    quote_date: today,
+    valid_till: addDays(today, QUOTE_DEFAULTS.validDays),
+    status: "draft",
+  });
+  revalidatePath("/admin/quotations");
+  redirect(`/admin/quotations/${copy.id}`);
 }
