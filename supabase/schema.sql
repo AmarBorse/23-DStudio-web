@@ -86,3 +86,4 @@ create table if not exists quotations (
 );
 alter table quotations enable row level security;
 notify pgrst, 'reload schema';
+alter table quotations add column if not exists history jsonb not null default '[]';

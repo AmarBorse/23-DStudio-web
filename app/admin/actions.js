@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, startSession, endSession, requireAdmin, loginConfigured } from "@/lib/auth";
 import { projects, team, enquiries, quotations } from "@/lib/store";
-import { nextQuoteNumber, todayISO, addDays } from "@/lib/quote";
+import { nextQuoteNumber, todayISO, addDays, changedFields, historyEntry, statusLabel } from "@/lib/quote";
 import { QUOTE_DEFAULTS } from "@/lib/company";
 import { CATEGORIES } from "@/lib/categories";
 import { refreshPublicPages } from "@/lib/revalidate";
@@ -180,11 +180,22 @@ export async function saveQuote(_prev, formData) {
 
   let saved;
   try {
-    const same = (await quotations.list()).find((x) => x.number === row.number && x.id !== id);
+    const all = await quotations.list();
+    const same = all.find((x) => x.number === row.number && x.id !== id);
     if (same) return { error: `Quote number ${row.number} is already used (client: ${same.client_name}). Please use another number.` };
-    saved = id ? await quotations.update(id, row) : await quotations.insert(row);
+    if (id) {
+      const before = all.find((x) => x.id === id);
+      const history = Array.isArray(before?.history) ? [...before.history] : [historyEntry("created")].map((h) => ({ ...h, at: before?.created_at || h.at }));
+      const changed = changedFields(before, row);
+      if (changed.length) history.push(historyEntry("edited", changed.join(", ")));
+      if (before && before.status !== row.status) history.push(historyEntry("status", `${statusLabel(before.status)} → ${statusLabel(row.status)}`));
+      saved = await quotations.update(id, { ...row, history });
+    } else {
+      saved = await quotations.insert({ ...row, history: [historyEntry("created", `Status: ${statusLabel(row.status)}`)] });
+    }
   } catch (e) {
     console.error(e);
+    if (/history/i.test(String(e.message))) return { error: "The database needs the history update: run supabase/update-4.sql in the Supabase SQL Editor." };
     if (/quotations|relation|column/i.test(String(e.message))) return { error: "The database needs the quotations update: run supabase/update-3.sql in the Supabase SQL Editor." };
     return { error: "Could not save. Is the database connected?" };
   }
@@ -197,7 +208,12 @@ export async function setQuoteStatus(formData) {
   await requireAdmin();
   const status = String(formData.get("status"));
   if (!QUOTE_STATUS_IDS.includes(status)) return;
-  await quotations.update(String(formData.get("id")), { status });
+  const id = String(formData.get("id"));
+  const before = await quotations.get("id", id);
+  if (!before || before.status === status) return;
+  const history = [...(Array.isArray(before.history) ? before.history : [{ ...historyEntry("created"), at: before.created_at }])];
+  history.push(historyEntry("status", `${statusLabel(before.status)} → ${statusLabel(status)}`));
+  await quotations.update(id, { status, history });
   revalidatePath("/admin/quotations");
 }
 
@@ -215,13 +231,18 @@ export async function duplicateQuote(formData) {
   const all = await quotations.list();
   const { id: _id, created_at: _c, ...rest } = q;
   const today = todayISO();
+  const number = nextQuoteNumber(all);
   const copy = await quotations.insert({
     ...rest,
-    number: nextQuoteNumber(all),
+    number,
     quote_date: today,
     valid_till: addDays(today, QUOTE_DEFAULTS.validDays),
     status: "draft",
+    history: [historyEntry("created", `Copied from quote ${q.number}`)],
   });
+  const origHistory = [...(Array.isArray(q.history) ? q.history : [{ ...historyEntry("created"), at: q.created_at }])];
+  origHistory.push(historyEntry("duplicated", `Copied to new quote ${number}`));
+  await quotations.update(q.id, { history: origHistory });
   revalidatePath("/admin/quotations");
   redirect(`/admin/quotations/${copy.id}`);
 }
