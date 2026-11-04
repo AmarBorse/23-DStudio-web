@@ -5,6 +5,8 @@ import { projects } from "@/lib/store";
 import { CATEGORIES } from "@/lib/categories";
 import { deleteProject, toggleProject } from "@/app/admin/actions";
 import ConfirmButton from "@/components/admin/ConfirmButton";
+import SubmitButton from "@/components/admin/SubmitButton";
+import LinkSpinner from "@/components/admin/LinkSpinner";
 import { cardImage, cardHref, hasPage } from "@/lib/projectRules";
 
 export default async function ProjectsAdmin({ searchParams }) {
@@ -15,7 +17,7 @@ export default async function ProjectsAdmin({ searchParams }) {
     <>
       <div className="adm-head">
         <h1 className="adm-h1">Projects</h1>
-        <Link className="adm-btn" href="/admin/projects/new">+ Add project</Link>
+        <Link className="adm-btn" href="/admin/projects/new">+ Add project<LinkSpinner /></Link>
       </div>
       {saved && <p className="adm-ok adm-toast" role="status">Saved. The website is updated.</p>}
       {CATEGORIES.map((c) => {
@@ -37,11 +39,11 @@ export default async function ProjectsAdmin({ searchParams }) {
                   </div>
                   <span className={`adm-pill ${p.published ? "live" : "draft"}`}>{p.published ? "Live" : "Hidden"}</span>
                   <div className="adm-actions">
-                    <Link className="adm-btn ghost" href={`/admin/projects/${p.id}`}>Edit</Link>
+                    <Link className="adm-btn ghost" href={`/admin/projects/${p.id}`}>Edit<LinkSpinner /></Link>
                     <form action={toggleProject}>
                       <input type="hidden" name="id" value={p.id} />
                       <input type="hidden" name="published" value={String(!p.published)} />
-                      <button className="adm-btn ghost" type="submit">{p.published ? "Hide" : "Publish"}</button>
+                      <SubmitButton>{p.published ? "Hide" : "Publish"}</SubmitButton>
                     </form>
                     {p.published && cardHref(p) && <a className="adm-btn ghost" href={cardHref(p)} target="_blank" rel="noopener noreferrer">View ↗</a>}
                     <form action={deleteProject}>

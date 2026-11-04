@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LinkSpinner from "@/components/admin/LinkSpinner";
 
 // Sidebar links; the current section is highlighted
 const links = [
@@ -22,6 +23,7 @@ export default function AdminNav({ unread = 0 }) {
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d={l.icon} /></svg>
             <span>{l.label}</span>
             {l.href === "/admin/enquiries" && unread > 0 && <span className="adm-badge">{unread}</span>}
+            <LinkSpinner />
           </Link>
         );
       })}

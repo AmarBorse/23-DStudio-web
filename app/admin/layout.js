@@ -4,6 +4,7 @@ import { isAdmin } from "@/lib/auth";
 import { backend, enquiries } from "@/lib/store";
 import { logout } from "@/app/admin/actions";
 import AdminNav from "@/components/admin/AdminNav";
+import Ripple from "@/components/admin/Ripple";
 import "./admin.css";
 
 export const metadata = { title: "Admin — 23D Studio", robots: { index: false, follow: false } };
@@ -35,6 +36,7 @@ export default async function AdminLayout({ children }) {
         </div>
       </aside>
       <main className="adm-main">{children}</main>
+      <Ripple />
     </div>
   );
 }

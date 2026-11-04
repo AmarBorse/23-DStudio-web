@@ -31,7 +31,7 @@ export default async function Dashboard() {
           ))}
         </ul>
       )}
-      <p><Link className="adm-btn" href="/admin/projects/new">+ Add a project</Link></p>
+      <p className="adm-dash-actions"><Link className="adm-btn" href="/admin/projects/new">+ Add a project</Link></p>
     </>
   );
 }

@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth";
 import { enquiries } from "@/lib/store";
 import { setEnquiryRead, deleteEnquiry } from "@/app/admin/actions";
 import ConfirmButton from "@/components/admin/ConfirmButton";
+import SubmitButton from "@/components/admin/SubmitButton";
 
 const fmt = (d) => new Date(d).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
 
@@ -33,7 +34,7 @@ export default async function EnquiriesAdmin() {
               <form action={setEnquiryRead}>
                 <input type="hidden" name="id" value={r.id} />
                 <input type="hidden" name="read" value={String(!r.read)} />
-                <button className="adm-btn ghost" type="submit">{r.read ? "Mark as new" : "Mark as read"}</button>
+                <SubmitButton>{r.read ? "Mark as new" : "Mark as read"}</SubmitButton>
               </form>
               <form action={deleteEnquiry}>
                 <input type="hidden" name="id" value={r.id} />

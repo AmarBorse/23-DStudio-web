@@ -224,3 +224,32 @@ html.anim .adm-side{animation:admSide .5s cubic-bezier(.2,.7,.2,1) both}
   .adm-nav a.active::before{transform:scaleX(1)}
   .adm-nav a svg{display:none}
 }
+
+/* ---------- click feedback ---------- */
+.adm-btn,.adm-nav a,.adm-stat,.adm-row-link{position:relative;overflow:hidden;isolation:isolate}
+.adm-ripple{position:absolute;z-index:-1;border-radius:50%;background:currentColor;opacity:.22;transform:scale(0);pointer-events:none;animation:admRipple .6s ease-out forwards}
+.adm-btn:not(.ghost):not(.danger) .adm-ripple{background:#fff;opacity:.3}
+@keyframes admRipple{to{transform:scale(1);opacity:0}}
+.adm-btn{will-change:transform}
+.adm-btn:hover:not(:disabled){transform:translateY(-1px)}
+.adm-btn:active:not(:disabled){transform:translateY(0) scale(.96)}
+.adm-btn.danger:hover:not(:disabled) {box-shadow:0 6px 14px -8px rgba(179,38,30,.6)}
+.adm-btn:not(.ghost):not(.danger):hover:not(:disabled){box-shadow:0 8px 18px -10px rgba(33,28,24,.7);opacity:1}
+.adm-dash-actions{margin-top:18px}
+
+/* spinner on a link while its page loads */
+.adm-link-spin{display:none;width:12px;height:12px;margin-left:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;opacity:.7}
+.adm-link-spin.on{display:inline-block;animation:admSpin .6s linear infinite}
+.adm-nav a .adm-link-spin{margin-left:auto}
+.adm-nav a .adm-badge + .adm-link-spin.on{margin-left:8px}
+
+/* loading placeholder while a page fetches its data */
+.adm-skeleton{display:flex;flex-direction:column;gap:14px}
+.sk{border-radius:12px;background:linear-gradient(90deg,#ebe5de 25%,#f5f1ec 45%,#ebe5de 65%);background-size:300% 100%;animation:skShine 1.2s ease-in-out infinite}
+.sk-title{width:220px;height:30px;border-radius:8px}
+.sk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sk-card{height:96px}
+.sk-row{height:76px}
+@keyframes skShine{from{background-position:100% 0}to{background-position:0 0}}
+@media (prefers-reduced-motion: reduce){.sk{animation:none}.adm-ripple{display:none}}
+@media (max-width: 800px){.sk-grid{grid-template-columns:1fr}}

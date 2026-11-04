@@ -1,9 +1,11 @@
 "use client";
 
+import SubmitButton from "@/components/admin/SubmitButton";
+
 export default function ConfirmButton({ message, children }) {
   return (
-    <button className="adm-btn danger" type="submit" onClick={(e) => { if (!confirm(message)) e.preventDefault(); }}>
+    <SubmitButton className="adm-btn danger" confirmMessage={message}>
       {children}
-    </button>
+    </SubmitButton>
   );
 }
