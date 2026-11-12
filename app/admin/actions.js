@@ -3,9 +3,10 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, startSession, endSession, requireAdmin, loginConfigured } from "@/lib/auth";
-import { projects, team, enquiries, quotations } from "@/lib/store";
+import { projects, team, enquiries, quotations, invoices } from "@/lib/store";
+import { nextInvoiceNumber, invoiceStatusLabel, invoiceTotals } from "@/lib/invoice";
 import { nextQuoteNumber, todayISO, addDays, changedFields, historyEntry, statusLabel } from "@/lib/quote";
-import { QUOTE_DEFAULTS } from "@/lib/company";
+import { QUOTE_DEFAULTS, INVOICE_DEFAULTS } from "@/lib/company";
 import { CATEGORIES } from "@/lib/categories";
 import { refreshPublicPages } from "@/lib/revalidate";
 
@@ -252,4 +253,145 @@ export async function duplicateQuote(formData) {
   await quotations.update(q.id, { history: origHistory });
   revalidatePath("/admin/quotations");
   redirect(`/admin/quotations/${copy.id}`);
+}
+
+
+/* ---------- invoices ---------- */
+const INVOICE_STATUS_IDS = ["unpaid", "partly_paid", "paid", "cancelled"];
+const withHistory = (row, entry) => [...(Array.isArray(row?.history) && row.history.length ? row.history : [{ ...historyEntry("created"), at: row?.created_at || new Date().toISOString() }]), entry];
+const INVOICE_LABELS = {
+  number: "Invoice No", invoice_date: "Date", due_date: "Due date", client_name: "Billed to", client_address: "Address",
+  client_phone: "Client phone", client_email: "Client email", heading: "Heading", items: "Items", discount: "Discount",
+  gst_enabled: "GST", gst_percent: "GST %", notes: "Notes", bank: "Bank details", closing: "Closing line", private_notes: "Private notes",
+  amount_paid: "Amount received", paid_on: "Payment date", customer_id: "Customer Id",
+};
+const invoiceChanges = (a, b) =>
+  Object.keys(INVOICE_LABELS).filter((k) => JSON.stringify(a?.[k] ?? "") !== JSON.stringify(b?.[k] ?? "")).map((k) => INVOICE_LABELS[k]);
+
+export async function saveInvoice(_prev, formData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const text = (k, max = 2000) => String(formData.get(k) || "").trim().slice(0, max);
+  const money = (v) => Math.max(0, Math.round((Number(v) || 0) * 100) / 100);
+  const optMoney = (v) => (v === "" || v === null || v === undefined ? "" : money(v));
+  let items = [];
+  try {
+    items = JSON.parse(String(formData.get("items") || "[]"));
+  } catch {}
+  items = items
+    .map((it) => ({
+      description: String(it.description || "").trim().slice(0, 1000),
+      qty: optMoney(it.qty),
+      rate: optMoney(it.rate),
+      amount: optMoney(it.amount),
+      included: Boolean(it.included),
+    }))
+    .filter((it) => it.description);
+
+  const row = {
+    number: text("number", 30),
+    invoice_date: text("invoice_date", 10) || null,
+    due_date: text("due_date", 10) || null,
+    quote_id: text("quote_id", 60) || null,
+    quote_number: text("quote_number", 30),
+    customer_id: text("customer_id", 30),
+    client_name: text("client_name", 200),
+    client_address: text("client_address", 500),
+    client_phone: text("client_phone", 40),
+    client_email: text("client_email", 200),
+    heading: text("heading", 200),
+    items,
+    discount: money(formData.get("discount")),
+    gst_enabled: formData.get("gst_enabled") === "on",
+    gst_percent: money(formData.get("gst_percent")),
+    notes: text("notes", 5000),
+    bank: text("bank", 2000),
+    closing: text("closing", 300),
+    private_notes: text("private_notes", 2000),
+    status: INVOICE_STATUS_IDS.includes(text("status")) ? text("status") : "unpaid",
+    amount_paid: money(formData.get("amount_paid")),
+    paid_on: text("paid_on", 10) || null,
+  };
+  if (!row.number) return { error: "Please enter an invoice number." };
+  if (!row.client_name) return { error: "Please enter who the invoice is billed to." };
+  if (!items.length) return { error: "Please add at least one item with a description." };
+  if (!row.invoice_date) return { error: "Please choose the invoice date." };
+  if (row.status === "paid" && !row.paid_on) row.paid_on = todayISO();
+
+  let saved;
+  try {
+    const all = await invoices.list();
+    const same = all.find((x) => x.number === row.number && x.id !== id);
+    if (same) return { error: `Invoice number ${row.number} is already used (billed to ${same.client_name}). Please use another number.` };
+    if (id) {
+      const before = all.find((x) => x.id === id);
+      let history = Array.isArray(before?.history) ? [...before.history] : [];
+      const changed = invoiceChanges(before, row);
+      if (changed.length) history = withHistory({ ...before, history }, historyEntry("edited", changed.join(", ")));
+      if (before && before.status !== row.status) history = withHistory({ ...before, history }, historyEntry("status", `${invoiceStatusLabel(before.status)} → ${invoiceStatusLabel(row.status)}`));
+      saved = await invoices.update(id, { ...row, history });
+    } else {
+      const first = historyEntry("created", row.quote_number ? `From quote ${row.quote_number}` : `Status: ${invoiceStatusLabel(row.status)}`);
+      saved = await invoices.insert({ ...row, history: [first] });
+      if (row.quote_id) {
+        const q = await quotations.get("id", row.quote_id).catch(() => null);
+        if (q) await quotations.update(q.id, { history: withHistory(q, historyEntry("invoiced", `Invoice ${row.number} created`)) });
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    if (/invoices|relation|column/i.test(String(e.message))) return { error: "The database needs the invoices update: run supabase/update-5.sql in the Supabase SQL Editor." };
+    return { error: "Could not save. Is the database connected?" };
+  }
+  revalidatePath("/admin/invoices");
+  revalidatePath("/admin/quotations");
+  revalidatePath("/admin");
+  redirect(formData.get("then") === "print" ? `/admin/invoices/${saved.id}/print` : "/admin/invoices?saved=1");
+}
+
+export async function setInvoiceStatus(formData) {
+  await requireAdmin();
+  const status = String(formData.get("status"));
+  if (!INVOICE_STATUS_IDS.includes(status)) return;
+  const inv = await invoices.get("id", String(formData.get("id")));
+  if (!inv || inv.status === status) return;
+  const patch = { status, history: withHistory(inv, historyEntry("status", `${invoiceStatusLabel(inv.status)} → ${invoiceStatusLabel(status)}`)) };
+  if (status === "paid") {
+    patch.amount_paid = invoiceTotals({ ...inv, status: "unpaid" }).total;
+    if (!inv.paid_on) patch.paid_on = todayISO();
+  }
+  await invoices.update(inv.id, patch);
+  revalidatePath("/admin/invoices");
+  revalidatePath("/admin");
+}
+
+export async function deleteInvoice(formData) {
+  await requireAdmin();
+  await invoices.remove(String(formData.get("id")));
+  revalidatePath("/admin/invoices");
+  revalidatePath("/admin");
+}
+
+export async function duplicateInvoice(formData) {
+  await requireAdmin();
+  const inv = await invoices.get("id", String(formData.get("id")));
+  if (!inv) return;
+  const all = await invoices.list();
+  const { id: _id, created_at: _c, ...rest } = inv;
+  const number = nextInvoiceNumber(all);
+  const copy = await invoices.insert({
+    ...rest,
+    number,
+    invoice_date: todayISO(),
+    due_date: null,
+    quote_id: null,
+    quote_number: "",
+    status: "unpaid",
+    amount_paid: 0,
+    paid_on: null,
+    history: [historyEntry("created", `Copied from invoice ${inv.number}`)],
+  });
+  await invoices.update(inv.id, { history: withHistory(inv, historyEntry("duplicated", `Copied to new invoice ${number}`)) });
+  revalidatePath("/admin/invoices");
+  redirect(`/admin/invoices/${copy.id}`);
 }

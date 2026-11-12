@@ -6,6 +6,11 @@ The admin lives at **/admin** (e.g. `https://your-site.vercel.app/admin`). From 
   (name, card caption, service tab, project link), card image, and "Create a project page" (main image,
   description, gallery, page address). Without a project page, clicking the project opens its link directly.
 - **Team** — add, edit or remove people in "Our Team" on the About page, with photo and role.
+- **Quotations** — create quotes laid out like the studio's quote (items, GST, discount, terms), live preview,
+  print / save as PDF, status (Draft, Sent, Accepted, Rejected), duplicate, search. Company details and default
+  terms are in `lib/company.js`.
+- **Invoices** — invoices laid out like the studio's invoice (heading, items with "Included", notes, bank details),
+  live preview, print / PDF, payment status and amount received, pending total, history; "Create invoice" on any quotation.
 - **Enquiries** — every message sent from the Contact page, newest first. Mark as read, reply by email, delete.
 
 Changes show on the website immediately.
@@ -35,7 +40,9 @@ Then **Deployments → … → Redeploy** so the new settings are used.
 
 ## Updates
 
-If your database was set up before the new project form, run `supabase/update-2.sql` once in the Supabase SQL Editor.
+If your database was set up earlier, run these once in the Supabase SQL Editor (each is safe to run again):
+`supabase/update-2.sql` (new project form), `supabase/update-3.sql` (quotations), `supabase/update-4.sql` (quote history)
+and `supabase/update-5.sql` (invoices).
 
 ## On your computer
 

@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
-import { projects, team, enquiries } from "@/lib/store";
+import { projects, team, enquiries, invoices } from "@/lib/store";
+import { invoiceTotals } from "@/lib/invoice";
+import { inr } from "@/lib/quote";
 import CountUp from "@/components/admin/CountUp";
 
 export default async function Dashboard() {
   await requireAdmin();
-  const [p, t, e] = await Promise.all([projects.list(), team.list(), enquiries.list()]);
+  const [p, t, e, inv] = await Promise.all([projects.list(), team.list(), enquiries.list(), invoices.list().catch(() => [])]);
+  const pending = inv.filter((x) => x.status !== "cancelled").reduce((s, x) => s + invoiceTotals(x).due, 0);
   const unread = e.filter((x) => !x.read);
   return (
     <>
@@ -15,6 +18,7 @@ export default async function Dashboard() {
         <Link href="/admin/projects" className="adm-card adm-stat"><strong><CountUp to={p.length} /></strong><span>Projects ({p.filter((x) => x.published).length} live)</span></Link>
         <Link href="/admin/team" className="adm-card adm-stat"><strong><CountUp to={t.length} /></strong><span>Team members</span></Link>
         <Link href="/admin/enquiries" className="adm-card adm-stat"><strong><CountUp to={unread.length} /></strong><span>New enquiries</span></Link>
+        <Link href="/admin/invoices?status=unpaid" className="adm-card adm-stat"><strong>{inr(pending)}</strong><span>Payments pending</span></Link>
       </div>
       <h2 className="adm-h2">Latest enquiries</h2>
       {e.length === 0 ? (

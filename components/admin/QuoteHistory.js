@@ -9,6 +9,7 @@ const TEXT = {
   edited: "Edited",
   status: "Status changed",
   duplicated: "Duplicated",
+  invoiced: "Invoice created",
 };
 
 // Timeline of one quotation + the client's other quotations

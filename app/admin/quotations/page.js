@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
-import { quotations } from "@/lib/store";
+import { quotations, invoices } from "@/lib/store";
 import { QUOTE_STATUSES, quoteTotals, inr, dmy, yearOf, quoteHistory } from "@/lib/quote";
 import { setQuoteStatus, deleteQuote, duplicateQuote } from "@/app/admin/actions";
 import ConfirmButton from "@/components/admin/ConfirmButton";
@@ -13,11 +13,16 @@ export default async function QuotationsAdmin({ searchParams }) {
   const { saved, status: filter = "all", q: search = "", year = "all" } = await searchParams;
   let rows = [];
   let dbError = false;
+  let invs = [];
   try {
     rows = await quotations.list();
   } catch {
     dbError = true;
   }
+  try {
+    invs = await invoices.list();
+  } catch {}
+  const invoicedBy = (id) => invs.filter((x) => x.quote_id === id);
   const years = [...new Set(rows.map(yearOf).filter(Boolean))].sort().reverse();
   const inYear = rows.filter((r) => year === "all" || yearOf(r) === year);
   const term = search.trim().toLowerCase();
@@ -101,6 +106,11 @@ export default async function QuotationsAdmin({ searchParams }) {
                   <div className="adm-actions">
                     <Link className="adm-btn ghost" href={`/admin/quotations/${r.id}`}>Edit &amp; history<LinkSpinner /></Link>
                     <Link className="adm-btn ghost" href={`/admin/quotations/${r.id}/print`}>Print / PDF<LinkSpinner /></Link>
+                    {invoicedBy(r.id).length ? (
+                      <Link className="adm-btn ghost" href={`/admin/invoices/${invoicedBy(r.id)[0].id}`}>Invoice {invoicedBy(r.id)[0].number}<LinkSpinner /></Link>
+                    ) : (
+                      <Link className="adm-btn ghost" href={`/admin/invoices/new?from=${r.id}`}>Create invoice<LinkSpinner /></Link>
+                    )}
                     <form action={duplicateQuote}>
                       <input type="hidden" name="id" value={r.id} />
                       <SubmitButton>Duplicate</SubmitButton>

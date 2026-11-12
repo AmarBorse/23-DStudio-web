@@ -393,3 +393,60 @@ html.anim .qh-timeline li:nth-child(n+4){animation-delay:.15s}
 @media (max-width: 800px){.qh-related a{grid-template-columns:1fr 1fr}}
 .pf-layout{margin:0;border:0 !important;border-top:1px solid var(--a-line) !important;border-radius:0 !important;padding:5px 8px !important;font-size:12px !important;background:#faf8f5 !important}
 .pf-small-select{max-width:260px}
+
+/* =====================================================================
+   INVOICES
+   ===================================================================== */
+.adm-stats{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.iv-due-stat strong{color:#a0451c}
+.iv-nums{grid-template-columns:80px 120px 120px auto 1fr}
+.iv-nums .qf-tools{justify-self:end}
+.iv-incl{flex-direction:row !important;align-items:center;gap:6px !important;padding-bottom:8px;color:var(--a-text) !important;font-size:13px !important}
+.qa-status .st-unpaid{background:#fdf1e4 !important;color:#8a4b12 !important}
+.qa-status .st-partly_paid{background:#e6eefb !important;color:#1d4f91 !important}
+.qa-status .st-paid{background:#e7f4ec !important;color:#1f5e36 !important}
+.qa-status .st-cancelled{background:#f1ece6 !important;color:#7c726a !important}
+.qh-status.st-unpaid{background:#fdf1e4;color:#8a4b12}.qh-status.st-partly_paid{background:#e6eefb;color:#1d4f91}
+.qh-status.st-paid{background:#e7f4ec;color:#1f5e36}.qh-status.st-cancelled{background:#f1ece6;color:#7c726a}
+@media (max-width: 800px){.iv-nums{grid-template-columns:1fr 1fr}}
+
+/* ---------- the invoice document (A4), like the reference ---------- */
+.iv{position:relative;box-sizing:border-box;width:210mm;min-height:297mm;padding:23mm 20.5mm 40mm 23mm;background:#fff;color:#111;font-family:var(--avenir);font-size:10.5pt;line-height:1.35;overflow:hidden}
+.iv *{box-sizing:border-box}
+.iv p,.iv h1,.iv h2{margin:0}
+.iv-no{position:absolute;right:20.5mm;top:22mm;font-size:11pt;letter-spacing:.04em}
+.iv-logo{display:block;width:17.5mm;height:auto}
+.iv-title{margin-top:9mm;font-family:var(--spartan);font-weight:800;font-size:46pt;line-height:1;letter-spacing:.01em}
+.iv-date{margin-top:6.5mm;font-size:11.4pt}
+.iv-parties{display:grid;grid-template-columns:96mm 1fr;gap:4mm;margin-top:5mm}
+.iv-parties h2{font-size:11.5pt;font-weight:800;margin-bottom:.6mm}
+.iv-co-name{font-weight:800;font-size:10.4pt}
+.iv-client{font-size:11pt;margin:1.2mm 0 0 1.2mm}
+.iv-small{font-size:8.8pt;line-height:1.42}
+.iv-parties > div:last-child .iv-small{margin-left:1.2mm}
+.iv-table{width:100%;margin-top:6.5mm;border-collapse:collapse;font-size:11.4pt}
+.iv-table thead th{padding:3mm 3mm;background:#e3e3e3;font-weight:500;text-align:center;font-size:11.4pt}
+.iv-table thead th:first-child{text-align:left;width:46%;padding-left:4mm}
+.iv-table td{padding:3mm 3mm;border-bottom:.7px solid #d6d6d6;vertical-align:top}
+.iv-table td:not(:first-child){text-align:center;white-space:nowrap}
+.iv-table td:last-child{font-size:11pt}
+.iv-table ul{margin:0;padding-left:5.5mm}
+.iv-table li{white-space:pre-wrap}
+.iv-heading td{padding-top:4mm;font-weight:800;font-size:10.8pt}
+.iv-table tr{break-inside:avoid}
+.iv-totals{display:grid;grid-template-columns:auto 28mm;gap:1mm 6mm;justify-content:end;margin:4.5mm 2mm 0 0;font-size:12pt}
+.iv-totals dt{text-align:right}
+.iv-totals dd{margin:0;text-align:center;font-variant-numeric:tabular-nums}
+.iv-total{font-weight:800}
+.iv-totals dt.iv-total{font-size:10pt}
+.iv-notes{width:127mm;margin-top:.5mm;padding-bottom:3.5mm;border-bottom:1.2px solid #111}
+.iv-notes h2,.iv-bank h2{font-size:9.8pt;font-weight:800;margin-bottom:.3mm}
+.iv-notes ul,.iv-bank ul{margin:0;padding-left:5.5mm;font-size:9.8pt;line-height:1.36}
+.iv-bank{margin-top:5mm}
+.iv-closing{position:absolute;right:20.5mm;bottom:31mm;font-size:12.6pt}
+.iv-stamp{position:absolute;right:28mm;top:62mm;padding:2mm 6mm;border:2.5px solid #1f7a45;border-radius:2mm;color:#1f7a45;font-family:var(--spartan);font-weight:800;font-size:22pt;letter-spacing:.12em;transform:rotate(-12deg);opacity:.85}
+.iv-waves{position:absolute;left:0;bottom:0;width:100%;height:30mm;display:block}
+.qf-preview-paper .iv{zoom:.54}
+@media (max-width: 1250px){.qf-preview-paper .iv{zoom:.7}}
+@media (max-width: 800px){.qf-preview-paper .iv{zoom:.45}}
+@media print{.iv{width:210mm;min-height:297mm;height:297mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
