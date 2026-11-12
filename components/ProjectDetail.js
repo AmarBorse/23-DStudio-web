@@ -32,10 +32,55 @@ function Linked({ href, label, children }) {
   );
 }
 
+// Splits the pictures into rows like the design PDF: wide pictures take a full row,
+// "half" pictures sit side by side in pairs (their widths follow their shapes, so the heights match).
+const isHalf = (im) => im.layout === "half" || (!im.layout && im.w / im.h < 1.45);
+function buildRows(images) {
+  const rows = [];
+  for (let i = 0; i < images.length; i++) {
+    const im = images[i];
+    const next = images[i + 1];
+    if (i > 0 && isHalf(im) && next && isHalf(next)) {
+      rows.push([im, next]);
+      i++;
+    } else rows.push([im]);
+  }
+  return rows;
+}
+
 export default function ProjectDetail({ project }) {
-  const [cover, ...gallery] = project.images;
+  const images = project.images || [];
   const paragraphs = (project.description || "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
   const embed = project.link ? videoEmbed(project.link) : null;
+  const rows = buildRows(images);
+  const flagged = images.findIndex((im) => im.text_after);
+  const textAfterImage = images[flagged >= 0 ? flagged : 0];
+  const textRow = rows.findIndex((r) => r.includes(textAfterImage));
+
+  const text = (
+    <>
+      {paragraphs.length > 0 && (
+        <div className="pd-text" data-anim="fade-up">
+          {paragraphs.map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+        </div>
+      )}
+      {project.link && !embed && (
+        <p className="pd-link" data-anim="fade-up">
+          <a className="pill pill-dark" href={project.link} target="_blank" rel="noopener noreferrer">
+            View project<span className="arr">➔</span>
+          </a>
+        </p>
+      )}
+      {embed && (
+        <div className="pd-video" data-anim="fade-up">
+          <iframe src={embed} title={`${project.title} — video`} loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+        </div>
+      )}
+    </>
+  );
+
   return (
     <>
       <header className="hero pd-head">
@@ -47,47 +92,34 @@ export default function ProjectDetail({ project }) {
 
       <main className="pd">
         <div className="wrap">
-          <nav className="pd-crumbs" aria-label="Breadcrumb" data-anim="fade-up">
-            <Link href="/work">Work</Link>
-            <span aria-hidden="true">/</span>
-            <Link href={`/work#${project.category.id}`}>{project.category.label}</Link>
-          </nav>
-          <h1 className="pd-title" data-anim="fade-up" style={{ "--d": "0.1s" }}>{project.title}</h1>
+          <h1 className="pd-title" data-anim="fade-up">{project.title}</h1>
 
-          <div className="pd-cover" data-anim="wipe-left" style={{ "--d": "0.2s" }}>
-            <Linked href={project.link} label={project.title}>
-              <Image src={cover.src} alt={cover.alt} width={cover.w} height={cover.h} sizes="(max-width: 819px) 100vw, 1220px" priority />
-            </Linked>
-          </div>
-
-          {paragraphs.length > 0 && (
-            <div className="pd-text" data-anim="fade-up">
-              {paragraphs.map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </div>
-          )}
-
-          {project.link && !embed && (
-            <p className="pd-link" data-anim="fade-up">
-              <a className="pill pill-dark" href={project.link} target="_blank" rel="noopener noreferrer">
-                View project<span className="arr">➔</span>
-              </a>
-            </p>
-          )}
-          {embed && (
-            <div className="pd-video" data-anim="fade-up">
-              <iframe src={embed} title={`${project.title} — video`} loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
-            </div>
-          )}
-
-          {gallery.map((img) => (
-            <div className="pd-image" key={img.src} data-anim="fade-up">
-              <Linked href={project.link} label={project.title}>
-                <Image src={img.src} alt={img.alt} width={img.w} height={img.h} sizes="(max-width: 819px) 100vw, 1220px" />
-              </Linked>
+          {rows.map((row, r) => (
+            <div key={r}>
+              <div
+                className={`pd-row${row.length > 1 ? " two" : ""}${r === 0 ? " first" : ""}${r > 0 && r - 1 !== textRow && typeof row[0].gap === "number" ? " gap" : ""}`}
+                data-anim={r === 0 ? "wipe-left" : "fade-up"}
+                style={r === 0 ? { "--d": "0.15s" } : typeof row[0].gap === "number" ? { "--gap": row[0].gap } : undefined}
+              >
+                {row.map((img, k) => (
+                  <figure key={img.src + k} className="pd-image" style={row.length > 1 ? { flexGrow: img.w / img.h } : undefined}>
+                    <Linked href={project.link} label={project.title}>
+                      <Image
+                        src={img.src}
+                        alt={img.alt}
+                        width={img.w}
+                        height={img.h}
+                        sizes={row.length > 1 ? "(max-width: 819px) 50vw, 640px" : "(max-width: 819px) 100vw, 1220px"}
+                        priority={r === 0}
+                      />
+                    </Linked>
+                  </figure>
+                ))}
+              </div>
+              {r === textRow && text}
             </div>
           ))}
+          {rows.length === 0 && text}
         </div>
       </main>
 

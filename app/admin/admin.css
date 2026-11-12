@@ -391,3 +391,5 @@ html.anim .qh-timeline li:nth-child(2){animation-delay:.05s}html.anim .qh-timeli
 html.anim .qh-timeline li:nth-child(n+4){animation-delay:.15s}
 @media (max-width: 1250px){.qf-wrap.with-preview + .qh{margin-right:0}}
 @media (max-width: 800px){.qh-related a{grid-template-columns:1fr 1fr}}
+.pf-layout{margin:0;border:0 !important;border-top:1px solid var(--a-line) !important;border-radius:0 !important;padding:5px 8px !important;font-size:12px !important;background:#faf8f5 !important}
+.pf-small-select{max-width:260px}

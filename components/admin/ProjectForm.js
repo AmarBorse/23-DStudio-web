@@ -84,6 +84,16 @@ function GalleryField({ items, setItems }) {
           <li key={img.src + i} className="pf-thumb">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img.src} alt="" />
+            <select
+              className="pf-layout"
+              aria-label={`Image ${i + 1} size on the page`}
+              value={img.layout || "auto"}
+              onChange={(e) => setItems((prev) => prev.map((x, j) => (j === i ? { ...x, layout: e.target.value === "auto" ? undefined : e.target.value } : x)))}
+            >
+              <option value="auto">Size: automatic</option>
+              <option value="full">Full width</option>
+              <option value="half">Half (side by side)</option>
+            </select>
             <div className="pf-thumb-bar">
               <span>{i + 1}</span>
               <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={`Move image ${i + 1} up`}>↑</button>
@@ -131,7 +141,10 @@ function PdfFill({ onUse }) {
   const use = async () => {
     setApplying(true);
     try {
-      await onUse({ name: result.name, description: result.description, pages: result.pages.filter((_, i) => picked[i]) });
+      const chosen = result.pages.map((p, i) => ({ ...p, i })).filter((p) => picked[p.i]);
+      // position (among the chosen pictures) that the description follows
+      const after = chosen.filter((p) => p.i <= result.descriptionAfter).length - 1;
+      await onUse({ name: result.name, description: result.description, pages: chosen, descriptionAfter: Math.max(0, after) });
       setResult(null);
     } finally {
       setApplying(false);
@@ -157,8 +170,8 @@ function PdfFill({ onUse }) {
             <dt>Description</dt><dd>{result.description || <span className="adm-muted">not found</span>}</dd>
           </dl>
           <p className="adm-muted">
-            Pages ({picked.filter(Boolean).length} of {result.pages.length} selected{result.totalPages > result.pages.length ? `, first ${result.pages.length} of ${result.totalPages}` : ""}).
-            The first selected page becomes the main image and card image; the rest go to the gallery.
+            Pictures found: {result.pages.length} ({picked.filter(Boolean).length} selected).
+            The first selected picture becomes the main image and card image; the rest go to the gallery in the same order and size as in the PDF.
           </p>
           <ul className="pf-gallery">
             {result.pages.map((p, i) => (
@@ -168,7 +181,7 @@ function PdfFill({ onUse }) {
                   <img src={p.preview} alt="" />
                   <span className="pf-thumb-bar">
                     <input type="checkbox" checked={picked[i]} onChange={() => setPicked((x) => x.map((v, j) => (j === i ? !v : v)))} />
-                    Page {i + 1}
+                    {i + 1}{p.half ? " · half" : ""}
                   </span>
                 </label>
               </li>
@@ -196,27 +209,43 @@ export default function ProjectForm({ project }) {
   const [mainImage, setMainImage] = useState(project?.images?.[0] || null);
   const [gallery, setGallery] = useState(project?.images?.slice(1) || []);
   const [hasPage, setHasPage] = useState(project ? projectHasPage(project) : true);
+  // which image the description sits under: 0 = main image, 1 = first gallery image, …
+  const [textAfter, setTextAfter] = useState(() => Math.max(0, (project?.images || []).findIndex((im) => im.text_after)));
 
   const setName = (v) => {
     setTitle(v);
     if (!slugTouched) setSlug(slugify(v));
   };
 
-  const fillFromPdf = async ({ name, description: desc, pages }) => {
+  const fillFromPdf = async ({ name, description: desc, pages, descriptionAfter = 0 }) => {
     if (name && (!title || confirm(`Replace the project name with “${name}”?`))) setName(name);
     if (desc && (!description || confirm("Replace the description with the one from the PDF?"))) setDescription(desc);
     const uploaded = [];
-    for (const p of pages) uploaded.push({ ...(await uploadImage(p.file)), alt: "" });
+    for (const p of pages) {
+      const img = { ...(await uploadImage(p.file)), alt: "", layout: p.half ? "half" : "full" };
+      if (typeof p.gap === "number") img.gap = p.gap; // same spacing as in the PDF
+      uploaded.push(img);
+    }
     if (!uploaded.length) return;
+    // a project that already has pictures: replace them (like the PDF) or add the new ones at the end
+    const replacing = !mainImage || confirm("Replace the current main image and gallery with the pictures from the PDF?\n\nOK = replace   ·   Cancel = add them at the end");
     const [first, ...rest] = uploaded;
-    if (!mainImage) setMainImage(first);
-    else rest.unshift(first);
-    if (!cardImage) setCardImage(first);
-    setGallery((g) => [...g, ...rest]);
+    if (replacing) {
+      setMainImage(first);
+      setGallery(rest);
+      if (!cardImage || confirm("Also use the first PDF picture as the Our Work page card image?")) setCardImage(first);
+    } else {
+      setGallery((g) => [...g, first, ...rest]);
+      if (!cardImage) setCardImage(first);
+    }
+    if (replacing && desc) setTextAfter(descriptionAfter); // same place as in the PDF
     setHasPage(true);
   };
 
-  const images = mainImage ? [mainImage, ...gallery] : gallery;
+  const images = (mainImage ? [mainImage, ...gallery] : gallery).map((im, i) => {
+    const { text_after: _t, ...rest } = im;
+    return i === Math.min(textAfter, (mainImage ? gallery.length : gallery.length - 1)) ? { ...rest, text_after: true } : rest;
+  });
 
   return (
     <form action={action} className="pf">
@@ -281,10 +310,16 @@ export default function ProjectForm({ project }) {
             <Field label="Main image *" hint="Big image at the top of the project page.">
               <ImageField value={mainImage} onChange={setMainImage} label="main image" />
             </Field>
-            <Field label="Description" hint="Paragraph under the main image. Leave an empty line between paragraphs.">
+            <Field label="Description" hint="Leave an empty line between paragraphs.">
               <textarea name="description" rows={5} value={description} onChange={(e) => setDescription(e.target.value)} />
             </Field>
-            <Field label="Gallery images" hint="Shown one below another on the project page. You can select several images at once.">
+            <Field label="Show the description below" hint="Where the text appears among the pictures on the project page.">
+              <select value={textAfter} onChange={(e) => setTextAfter(Number(e.target.value))} className="pf-small-select">
+                <option value={0}>the main image</option>
+                {gallery.map((_, i) => <option key={i} value={i + 1}>gallery image {i + 1}</option>)}
+              </select>
+            </Field>
+            <Field label="Gallery images" hint="Shown below the main image. “Half” pictures sit side by side in pairs; “automatic” makes narrow pictures half and wide ones full width.">
               <GalleryField items={gallery} setItems={setGallery} />
             </Field>
             <Field label="Page address" hint={<>23dstudio…/work/<strong>{slug || "project-name"}</strong></>}>

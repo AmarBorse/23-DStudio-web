@@ -46,7 +46,14 @@ export async function saveProject(_prev, formData) {
       return fallback;
     }
   };
-  const cleanImage = (im) => (im?.src ? { src: String(im.src), w: Number(im.w) || 1600, h: Number(im.h) || 900, alt: String(im.alt || title) } : null);
+  const cleanImage = (im) => {
+    if (!im?.src) return null;
+    const out = { src: String(im.src), w: Number(im.w) || 1600, h: Number(im.h) || 900, alt: String(im.alt || title) };
+    if (["full", "half"].includes(im.layout)) out.layout = im.layout; // gallery: full width or side by side
+    if (im.text_after) out.text_after = true; // the description is shown below this image
+    if (Number.isFinite(Number(im.gap)) && im.gap !== "" && im.gap !== null) out.gap = Math.min(200, Math.max(0, Number(im.gap))); // space above, from the PDF
+    return out;
+  };
   const images = parse("images", []).map(cleanImage).filter(Boolean);
   const card_image = cleanImage(parse("card_image", null));
 
