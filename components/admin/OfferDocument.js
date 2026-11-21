@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { COMPANY, OFFER_DEFAULTS } from "@/lib/company";
+import { COMPANY, OFFER_DEFAULTS, COMPLETION_DEFAULTS } from "@/lib/company";
 import { letterParagraphs, longDate, firstName, offerType, fillPlaceholders } from "@/lib/offer";
 import { boldParts } from "@/lib/invoice";
 
@@ -89,7 +89,27 @@ const Signature = ({ o }) => (
 const style = { "--ol-a": OFFER_DEFAULTS.accent, "--ol-b": OFFER_DEFAULTS.accent2 };
 
 export default function OfferDocument({ o }) {
-  return offerType(o) === "internship" ? <InternshipLetter o={o} /> : <JobLetter o={o} />;
+  const type = offerType(o);
+  if (type === "internship") return <InternshipLetter o={o} />;
+  if (type === "completion") return <CompletionLetter o={o} />;
+  return <JobLetter o={o} />;
+}
+
+// Internship completion: one page — studio and date, "To whom it may concern", certificate text, signature
+function CompletionLetter({ o }) {
+  return (
+    <article className="ol ol-intern ol-done" aria-label={`Internship completion letter ${o.number || ""}`} style={style}>
+      <Background />
+      <Head title="INTERNSHIP COMPLETION LETTER" />
+      <StudioAndDate o={o} />
+      <p className="ol-concern">{COMPLETION_DEFAULTS.heading}</p>
+      <section className="ol-body">
+        {letterParagraphs(o).map((parts, i) => <p key={i}><Rich parts={parts} /></p>)}
+      </section>
+      <Signature o={o} />
+      <div className="ol-contact-row"><Contact /></div>
+    </article>
+  );
 }
 
 // Job offer: one page, laid out like the Canva "Job Offer Letter" template

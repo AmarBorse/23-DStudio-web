@@ -558,3 +558,17 @@ html.anim .qh-timeline li:nth-child(n+4){animation-delay:.15s}
 .ol-blank{display:inline-block;width:62mm;border-bottom:1px solid #1b1b1b;height:1em}
 .ol-blank.short{width:38mm}
 .ol-intern .ol-contact-row{margin-top:auto;padding-top:3mm}
+
+/* internship completion letter */
+.ol-done{font-size:11.8pt;line-height:1.58}
+.ol .ol-concern{margin-top:16mm;text-align:center;font-family:var(--spartan);font-weight:700;font-size:13pt;letter-spacing:.08em;text-decoration:underline;text-underline-offset:1.6mm;text-decoration-thickness:1px}
+.ol-done .ol-body{margin-top:11mm}
+.ol-done .ol-body p + p{margin-top:5mm}
+.ol-done > .ol-sign{margin-top:14mm;font-size:11.4pt}
+.ol-done .ol-signature{height:18mm}
+.ol-done .ol-signature img{max-height:18mm}
+.ol-type.completion{background:#ede7f6;color:#5b3d8f}
+.ol-title{white-space:nowrap}
+.ol-brand{flex:none}
+.ol-brand span{white-space:nowrap}
+.ol-done .ol-title{font-size:19.5pt}

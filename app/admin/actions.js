@@ -439,7 +439,7 @@ export async function saveOffer(_prev, formData) {
     signature: /^(https:\/\/|\/media\/|\/images\/)/.test(signature) ? signature : "",
     private_notes: text("private_notes", 2000),
     status: OFFER_STATUS_IDS.includes(text("status")) ? text("status") : "draft",
-    letter_type: text("letter_type") === "internship" ? "internship" : "job",
+    letter_type: ["internship", "completion"].includes(text("letter_type")) ? text("letter_type") : "job",
     department: text("department", 120),
     end_date: date("end_date"),
     duration: text("duration", 60),
@@ -450,8 +450,12 @@ export async function saveOffer(_prev, formData) {
     responsibilities: text("responsibilities", 4000),
     terms: text("terms", 10000),
   };
-  if (row.letter_type === "internship" && row.start_date && row.end_date && row.end_date < row.start_date)
+  if (row.letter_type !== "job" && row.start_date && row.end_date && row.end_date < row.start_date)
     return { error: "The internship end date is before the start date." };
+  if (row.letter_type === "completion" && (!row.start_date || !row.end_date))
+    return { error: "Please enter the internship start and end dates." };
+  if (row.letter_type === "completion" && row.end_date && row.letter_date && row.letter_date < row.end_date)
+    return { error: "A completion letter can only be dated on or after the internship’s end date." };
   if (!row.number) return { error: "Please enter a reference number." };
   if (!row.candidate_name) return { error: "Please enter the candidate’s name." };
   if (!row.position) return { error: "Please enter the position." };
@@ -471,7 +475,8 @@ export async function saveOffer(_prev, formData) {
       if (before && before.status !== row.status) history = withHistory({ ...before, history }, historyEntry("status", `${offerStatusLabel(before.status)} → ${offerStatusLabel(row.status)}`));
       saved = await offerLetters.update(id, { ...row, history });
     } else {
-      saved = await offerLetters.insert({ ...row, history: [historyEntry("created", `${row.position} · ${offerStatusLabel(row.status)}`)] });
+      const from = text("source_number", 30);
+      saved = await offerLetters.insert({ ...row, history: [historyEntry("created", `${row.position} · ${offerStatusLabel(row.status)}${from ? ` · from internship offer ${from}` : ""}`)] });
     }
   } catch (e) {
     console.error(e);
@@ -506,7 +511,7 @@ export async function duplicateOffer(formData) {
   if (!o) return;
   const all = await offerLetters.list();
   const { id: _id, created_at: _c, ...rest } = o;
-  const number = nextOfferNumber(all, o.letter_type === "internship" ? "internship" : "job");
+  const number = nextOfferNumber(all, ["internship", "completion"].includes(o.letter_type) ? o.letter_type : "job");
   const today = todayISO();
   const copy = await offerLetters.insert({
     ...rest,

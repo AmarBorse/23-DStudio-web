@@ -4,7 +4,7 @@ import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 import { saveOffer } from "@/app/admin/actions";
 import OfferDocument from "@/components/admin/OfferDocument";
-import { OFFER_STATUSES, OFFER_TYPES, PLACEHOLDERS, INTERNSHIP_PLACEHOLDERS, firstName, durationText, offerType } from "@/lib/offer";
+import { OFFER_STATUSES, OFFER_TYPES, PLACEHOLDERS, INTERNSHIP_PLACEHOLDERS, COMPLETION_PLACEHOLDERS, firstName, durationText, offerType } from "@/lib/offer";
 import { addDays } from "@/lib/quote";
 import { uploadImage } from "@/components/admin/upload";
 
@@ -20,7 +20,17 @@ export default function OfferForm({ offer, defaults }) {
   const [state, action, pending] = useActionState(saveOffer, null);
   const [o, setO] = useState(() => ({ ...defaults, ...offer, letter_type: offerType(offer || defaults) }));
   const intern = o.letter_type === "internship";
+  const done = o.letter_type === "completion";
   const std = defaults.standard[o.letter_type];
+  const NAMES = { job: "offer letter", internship: "internship offer", completion: "completion letter" };
+  // fields each type shows; the rest are sent as hidden inputs so nothing is lost when saving
+  const SHOWN = {
+    job: ["position", "start_date", "reporting_to", "work_location", "salary", "accept_by", "benefits", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"],
+    internship: ["position", "department", "start_date", "end_date", "duration", "work_mode", "working_hours", "reporting_to", "salary", "accept_by", "responsibilities", "terms", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"],
+    completion: ["position", "department", "start_date", "end_date", "duration", "reporting_to", "responsibilities"],
+  }[o.letter_type];
+  const ALL = ["position", "department", "start_date", "end_date", "duration", "work_mode", "working_hours", "work_location", "reporting_to", "salary", "accept_by", "benefits", "responsibilities", "notice", "about", "terms", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"];
+  const hidden = ALL.filter((k) => !SHOWN.includes(k));
 
   // switch between a job offer and an internship offer
   const switchType = (type) => {
@@ -97,7 +107,7 @@ export default function OfferForm({ offer, defaults }) {
       <form action={action} className="pf qf">
         <div className="pf-top">
           <Link href="/admin/offers" className="pf-back">← All offer letters</Link>
-          <h1 className="pf-title">{offer ? `Edit ${intern ? "internship offer" : "offer"} ${offer.number}` : intern ? "New internship offer" : "New offer letter"}</h1>
+          <h1 className="pf-title">{offer ? `Edit ${NAMES[o.letter_type]} ${offer.number}` : `New ${NAMES[o.letter_type]}`}</h1>
         </div>
         {offer && <input type="hidden" name="id" value={offer.id} />}
         <input type="hidden" name="signature" value={o.signature || ""} />
@@ -112,7 +122,15 @@ export default function OfferForm({ offer, defaults }) {
               </button>
             ))}
           </div>
-          <p className="pf-hint">{intern ? "One page: date, candidate, offer letter, your signature, and an acceptance box for the candidate to sign." : "One page, like the Canva Job Offer Letter template."}</p>
+          <p className="pf-hint">
+            {done
+              ? "One page, issued after the internship: “To whom it may concern”, the certificate text and your signature."
+              : intern
+                ? "One page: date, candidate, offer letter, your signature, and an acceptance box for the candidate to sign."
+                : "One page, like the Canva Job Offer Letter template."}
+          </p>
+          {o.source_number && <p className="adm-ok">Details copied from internship offer {o.source_number}. Check the dates before saving.</p>}
+          <input type="hidden" name="source_number" value={o.source_number || ""} />
         </section>
 
         <section className="adm-card pf-card">
@@ -129,21 +147,42 @@ export default function OfferForm({ offer, defaults }) {
         </section>
 
         <section className="adm-card pf-card">
-          <h2 className="pf-card-title">Candidate (To)</h2>
-          <div className="pf-two">
+          <h2 className="pf-card-title">{done ? "Intern" : "Candidate (To)"}</h2>
+          {done ? (
             <F label="Full name *"><input name="candidate_name" value={o.candidate_name} onChange={set("candidate_name")} required /></F>
-            <F label="“Dear …” name" hint="Leave empty to use the first name.">
-              <input name="greeting_name" value={o.greeting_name} onChange={set("greeting_name")} placeholder={firstName(o.candidate_name)} />
-            </F>
-            <F label="Address" hint="One line per row."><textarea name="candidate_address" rows={2} value={o.candidate_address} onChange={set("candidate_address")} /></F>
-            <div className="pf-field">
-              <F label="Email"><input type="email" name="candidate_email" value={o.candidate_email} onChange={set("candidate_email")} /></F>
-              <F label="Phone"><input name="candidate_phone" value={o.candidate_phone} onChange={set("candidate_phone")} /></F>
+          ) : (
+            <div className="pf-two">
+              <F label="Full name *"><input name="candidate_name" value={o.candidate_name} onChange={set("candidate_name")} required /></F>
+              <F label="“Dear …” name" hint="Leave empty to use the first name.">
+                <input name="greeting_name" value={o.greeting_name} onChange={set("greeting_name")} placeholder={firstName(o.candidate_name)} />
+              </F>
+              <F label="Address" hint="One line per row."><textarea name="candidate_address" rows={2} value={o.candidate_address} onChange={set("candidate_address")} /></F>
+              <div className="pf-field">
+                <F label="Email"><input type="email" name="candidate_email" value={o.candidate_email} onChange={set("candidate_email")} /></F>
+                <F label="Phone"><input name="candidate_phone" value={o.candidate_phone} onChange={set("candidate_phone")} /></F>
+              </div>
             </div>
-          </div>
+          )}
         </section>
 
-        {!intern ? (
+        {done ? (
+          <section className="adm-card pf-card">
+            <h2 className="pf-card-title">Internship completed</h2>
+            <div className="pf-two">
+              <F label="Position *"><input name="position" value={o.position} onChange={set("position")} placeholder="e.g. HR Executive Intern" required /></F>
+              <F label="Department"><input name="department" value={o.department} onChange={set("department")} /></F>
+              <F label="Start date *"><input type="date" name="start_date" value={o.start_date || ""} onChange={set("start_date")} required /></F>
+              <F label="End date *"><input type="date" name="end_date" value={o.end_date || ""} onChange={set("end_date")} required /></F>
+              <F label="Duration" hint="Leave empty to work it out from the dates.">
+                <input name="duration" value={o.duration} onChange={set("duration")} placeholder={durationText(o.start_date, o.end_date) || "e.g. 6 months"} />
+              </F>
+              <F label="Supervisor"><input name="reporting_to" value={o.reporting_to} onChange={set("reporting_to")} placeholder="e.g. Gaurav Duse" /></F>
+            </div>
+            <F label="Work done (used in the letter)" hint="Completes the sentence “During the internship, {first_name} assisted the team with …”.">
+              <textarea name="responsibilities" rows={3} value={o.responsibilities} onChange={set("responsibilities")} />
+            </F>
+          </section>
+        ) : !intern ? (
           <section className="adm-card pf-card">
             <h2 className="pf-card-title">Job details</h2>
             <div className="pf-two">
@@ -178,20 +217,17 @@ export default function OfferForm({ offer, defaults }) {
             </F>
           </section>
         )}
-        {/* keep the other type's fields when saving */}
-        {!intern && ["department", "end_date", "duration", "work_mode", "working_hours", "notice", "about", "responsibilities", "terms"].map((k) => (
-          <input key={k} type="hidden" name={k} value={o[k] || ""} />
-        ))}
-        {intern && ["work_location", "benefits", "notice", "about"].map((k) => <input key={k} type="hidden" name={k} value={o[k] || ""} />)}
+        {/* keep the other types' fields when saving */}
+        {hidden.map((k) => <input key={k} type="hidden" name={k} value={o[k] || ""} />)}
 
         <section className="adm-card pf-card">
           <F label="Letter text" hint="Leave an empty line between paragraphs. **two stars** make words bold. Click a field to insert it where the cursor is:">
             <span className="ol-help">
-              {Object.entries(intern ? INTERNSHIP_PLACEHOLDERS : PLACEHOLDERS).map(([k, label]) => (
+              {Object.entries(done ? COMPLETION_PLACEHOLDERS : intern ? INTERNSHIP_PLACEHOLDERS : PLACEHOLDERS).map(([k, label]) => (
                 <code key={k} role="button" tabIndex={0} title={label} onClick={() => insert(k, "body")} onKeyDown={(e) => e.key === "Enter" && insert(k, "body")}>{`{${k}}`}</code>
               ))}
             </span>
-            <textarea ref={bodyRef} name="body" rows={intern ? 14 : 11} value={o.body} onChange={set("body")} />
+            <textarea ref={bodyRef} name="body" rows={intern ? 14 : done ? 10 : 11} value={o.body} onChange={set("body")} />
           </F>
           <button type="button" className="adm-btn ghost" onClick={() => confirm("Replace this text with the standard text?") && setO((p) => ({ ...p, body: std.body }))}>Reset to standard text</button>
         </section>
@@ -232,7 +268,7 @@ export default function OfferForm({ offer, defaults }) {
           <button type="button" className="adm-btn ghost qf-preview-toggle" onClick={() => setShowPreview((x) => !x)}>{showPreview ? "Hide preview" : "Show preview"}</button>
           <Link className="adm-btn ghost" href="/admin/offers">Cancel</Link>
           <button className={`adm-btn ghost${pending ? " is-busy" : ""}`} type="submit" name="then" value="print" disabled={pending || sigBusy}>Save &amp; print / PDF</button>
-          <button className={`adm-btn pf-save${pending ? " is-busy" : ""}`} type="submit" disabled={pending || sigBusy}>{intern ? "Save internship offer" : "Save offer letter"}</button>
+          <button className={`adm-btn pf-save${pending ? " is-busy" : ""}`} type="submit" disabled={pending || sigBusy}>Save {NAMES[o.letter_type]}</button>
         </div>
       </form>
 
