@@ -623,3 +623,13 @@ html.anim .qh-timeline li:nth-child(n+4){animation-delay:.15s}
 .ol-row{row-gap:12px}
 .ol-row > .adm-grow{flex:1 1 340px}
 .ol-row > .adm-actions{flex:0 1 auto}
+
+/* letter of recommendation: same layout as the completion letter, a little tighter for the longer text */
+.ol-lor{font-size:10.6pt;line-height:1.5}
+.ol-lor .ol-body{margin-top:8mm}
+.ol-lor .ol-salute{font-weight:800}
+.ol-lor .ol-body p + p{margin-top:3.2mm}
+.ol-lor > .ol-sign{margin-top:7mm;font-size:10.6pt}
+.ol-lor .ol-signature{height:15mm}
+.ol-lor .ol-signature img{max-height:15mm}
+.ol-type.recommendation{background:#e6f0fb;color:#24558f}

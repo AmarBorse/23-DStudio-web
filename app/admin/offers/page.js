@@ -43,6 +43,7 @@ export default async function OffersAdmin({ searchParams }) {
       <div className="adm-head">
         <h1 className="adm-h1">Offer letters</h1>
         <div className="adm-actions">
+          <Link className="adm-btn ghost" href="/admin/offers/new?type=recommendation">+ LOR<LinkSpinner /></Link>
           <Link className="adm-btn ghost" href="/admin/offers/new?type=certificate">+ Certificate<LinkSpinner /></Link>
           <Link className="adm-btn ghost" href="/admin/offers/new?type=completion">+ Completion letter<LinkSpinner /></Link>
           <Link className="adm-btn ghost" href="/admin/offers/new?type=internship">+ Internship offer<LinkSpinner /></Link>
@@ -86,7 +87,7 @@ export default async function OffersAdmin({ searchParams }) {
                 <li key={r.id} className="adm-card adm-row qa-row ol-row">
                   <div className="adm-grow">
                     <strong>{r.candidate_name}</strong>
-                    <span className={`ol-type ${offerType(r)}`}>{{ job: "Job", internship: "Internship", completion: "Completion", certificate: "Certificate" }[offerType(r)]}</span>{" "}
+                    <span className={`ol-type ${offerType(r)}`}>{{ job: "Job", internship: "Internship", completion: "Completion", certificate: "Certificate", recommendation: "LOR" }[offerType(r)]}</span>{" "}
                     <span className="adm-muted">· {r.number} · {dmy(r.letter_date)}</span>
                     <div>{r.position}{r.salary && !isAfterInternship(offerType(r)) && <span className="adm-muted"> · {offerType(r) === "internship" ? `stipend ${r.salary}` : `${r.salary}/month`}</span>}</div>
                     <div className="qa-last">
@@ -104,6 +105,9 @@ export default async function OffersAdmin({ searchParams }) {
                     )}
                     {(offerType(r) === "internship" || offerType(r) === "completion") && (
                       <Link className="adm-btn ghost" href={`/admin/offers/new?type=certificate&from=${r.id}`}>Certificate<LinkSpinner /></Link>
+                    )}
+                    {(offerType(r) === "internship" || offerType(r) === "completion") && (
+                      <Link className="adm-btn ghost" href={`/admin/offers/new?type=recommendation&from=${r.id}`}>LOR<LinkSpinner /></Link>
                     )}
                     <form action={duplicateOffer}><input type="hidden" name="id" value={r.id} /><SubmitButton>Use as template</SubmitButton></form>
                     <form action={deleteOffer}><input type="hidden" name="id" value={r.id} /><ConfirmButton message={`Delete the offer letter for ${r.candidate_name}? This cannot be undone.`}>Delete</ConfirmButton></form>

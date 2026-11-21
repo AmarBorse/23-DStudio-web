@@ -4,7 +4,7 @@ import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 import { saveOffer } from "@/app/admin/actions";
 import OfferDocument from "@/components/admin/OfferDocument";
-import { OFFER_STATUSES, OFFER_TYPES, PLACEHOLDERS, INTERNSHIP_PLACEHOLDERS, COMPLETION_PLACEHOLDERS, CERTIFICATE_PLACEHOLDERS, firstName, durationText, offerType } from "@/lib/offer";
+import { OFFER_STATUSES, OFFER_TYPES, PLACEHOLDERS, INTERNSHIP_PLACEHOLDERS, COMPLETION_PLACEHOLDERS, CERTIFICATE_PLACEHOLDERS, RECOMMENDATION_PLACEHOLDERS, PRONOUNS, firstName, durationText, offerType } from "@/lib/offer";
 import { addDays } from "@/lib/quote";
 import { uploadImage } from "@/components/admin/upload";
 
@@ -21,15 +21,17 @@ export default function OfferForm({ offer, defaults }) {
   const [o, setO] = useState(() => ({ ...defaults, ...offer, letter_type: offerType(offer || defaults) }));
   const intern = o.letter_type === "internship";
   const cert = o.letter_type === "certificate";
-  const done = o.letter_type === "completion" || cert; // issued after the internship
+  const lor = o.letter_type === "recommendation";
+  const done = o.letter_type === "completion" || cert || lor; // issued after the internship
   const std = defaults.standard[o.letter_type];
-  const NAMES = { job: "offer letter", internship: "internship offer", completion: "completion letter", certificate: "certificate" };
+  const NAMES = { job: "offer letter", internship: "internship offer", completion: "completion letter", certificate: "certificate", recommendation: "recommendation letter" };
   // fields each type shows; the rest are sent as hidden inputs so nothing is lost when saving
   const SHOWN = {
     job: ["position", "start_date", "reporting_to", "work_location", "salary", "accept_by", "benefits", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"],
     internship: ["position", "department", "start_date", "end_date", "duration", "work_mode", "working_hours", "reporting_to", "salary", "accept_by", "responsibilities", "terms", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"],
     completion: ["position", "department", "start_date", "end_date", "duration", "reporting_to", "responsibilities"],
     certificate: ["position", "department", "start_date", "end_date", "duration"],
+    recommendation: ["position", "department", "start_date", "end_date", "duration", "responsibilities", "about", "greeting_name"],
   }[o.letter_type];
   const ALL = ["position", "department", "start_date", "end_date", "duration", "work_mode", "working_hours", "work_location", "reporting_to", "salary", "accept_by", "benefits", "responsibilities", "notice", "about", "terms", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"];
   const hidden = ALL.filter((k) => !SHOWN.includes(k));
@@ -115,6 +117,7 @@ export default function OfferForm({ offer, defaults }) {
         {offer && <input type="hidden" name="id" value={offer.id} />}
         <input type="hidden" name="signature" value={o.signature || ""} />
         <input type="hidden" name="stamp" value={o.stamp || ""} />
+        {!lor && <input type="hidden" name="pronoun" value={o.pronoun || ""} />}
         <input type="hidden" name="letter_type" value={o.letter_type} />
 
         <section className="adm-card pf-card">
@@ -127,7 +130,9 @@ export default function OfferForm({ offer, defaults }) {
             ))}
           </div>
           <p className="pf-hint">
-            {cert
+            {lor
+              ? "One page letter of recommendation (LOR), written by the signatory: “To whom it may concern”, the recommendation and contact details for verification."
+              : cert
               ? "A4 landscape certificate: the intern’s name in large script, the internship details, date of issue, certificate number and your signature."
               : done
               ? "One page, issued after the internship: “To whom it may concern”, the certificate text and your signature."
@@ -155,7 +160,19 @@ export default function OfferForm({ offer, defaults }) {
 
         <section className="adm-card pf-card">
           <h2 className="pf-card-title">{done ? "Intern" : "Candidate (To)"}</h2>
-          {done ? (
+          {lor ? (
+            <div className="pf-two">
+              <F label="Full name *"><input name="candidate_name" value={o.candidate_name} onChange={set("candidate_name")} required /></F>
+              <F label="Salutation" hint="e.g. “To Whom It May Concern,” or “Dear Hiring Manager,”.">
+                <input name="greeting_name" value={o.greeting_name} onChange={set("greeting_name")} placeholder="To Whom It May Concern," />
+              </F>
+              <F label="Refer to the intern as" hint="Used for she / he, her / his in the letter.">
+                <select name="pronoun" value={o.pronoun || ""} onChange={set("pronoun")}>
+                  {PRONOUNS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+                </select>
+              </F>
+            </div>
+          ) : done ? (
             <F label="Full name *"><input name="candidate_name" value={o.candidate_name} onChange={set("candidate_name")} required /></F>
           ) : (
             <div className="pf-two">
@@ -183,11 +200,16 @@ export default function OfferForm({ offer, defaults }) {
               <F label="Duration" hint="Leave empty to work it out from the dates.">
                 <input name="duration" value={o.duration} onChange={set("duration")} placeholder={durationText(o.start_date, o.end_date) || "e.g. 6 months"} />
               </F>
-              {!cert && <F label="Supervisor"><input name="reporting_to" value={o.reporting_to} onChange={set("reporting_to")} placeholder="e.g. Gaurav Duse" /></F>}
+              {!cert && !lor && <F label="Supervisor"><input name="reporting_to" value={o.reporting_to} onChange={set("reporting_to")} placeholder="e.g. Gaurav Duse" /></F>}
             </div>
             {!cert && (
-              <F label="Work done (used in the letter)" hint="Completes the sentence “During the internship, {first_name} assisted the team with …”.">
+              <F label="Work done (used in the letter)" hint={lor ? "Completes the sentence “She / He assisted our team with …”." : "Completes the sentence “During the internship, {first_name} assisted the team with …”."}>
                 <textarea name="responsibilities" rows={3} value={o.responsibilities} onChange={set("responsibilities")} />
+              </F>
+            )}
+            {lor && (
+              <F label="Specific example" hint="One or two real examples of the intern’s work or achievements, printed at the end of paragraph 2. Edit this for every intern.">
+                <textarea name="about" rows={3} value={o.about} onChange={set("about")} />
               </F>
             )}
           </section>
@@ -232,11 +254,11 @@ export default function OfferForm({ offer, defaults }) {
         <section className="adm-card pf-card">
           <F label={cert ? "Certificate text" : "Letter text"} hint={`${cert ? "Printed under the name. " : ""}Leave an empty line between paragraphs. **two stars** make words bold. Click a field to insert it where the cursor is:`}>
             <span className="ol-help">
-              {Object.entries(cert ? CERTIFICATE_PLACEHOLDERS : done ? COMPLETION_PLACEHOLDERS : intern ? INTERNSHIP_PLACEHOLDERS : PLACEHOLDERS).map(([k, label]) => (
+              {Object.entries(lor ? RECOMMENDATION_PLACEHOLDERS : cert ? CERTIFICATE_PLACEHOLDERS : done ? COMPLETION_PLACEHOLDERS : intern ? INTERNSHIP_PLACEHOLDERS : PLACEHOLDERS).map(([k, label]) => (
                 <code key={k} role="button" tabIndex={0} title={label} onClick={() => insert(k, "body")} onKeyDown={(e) => e.key === "Enter" && insert(k, "body")}>{`{${k}}`}</code>
               ))}
             </span>
-            <textarea ref={bodyRef} name="body" rows={intern ? 14 : cert ? 6 : done ? 10 : 11} value={o.body} onChange={set("body")} />
+            <textarea ref={bodyRef} name="body" rows={intern || lor ? 14 : cert ? 6 : done ? 10 : 11} value={o.body} onChange={set("body")} />
           </F>
           <button type="button" className="adm-btn ghost" onClick={() => confirm("Replace this text with the standard text?") && setO((p) => ({ ...p, body: std.body }))}>Reset to standard text</button>
         </section>
@@ -255,7 +277,7 @@ export default function OfferForm({ offer, defaults }) {
           <div className="pf-two">
             {cert ? <input type="hidden" name="closing" value={o.closing || ""} /> : <F label="Closing"><input name="closing" value={o.closing} onChange={set("closing")} /></F>}
             <F label="Name"><input name="signatory_name" value={o.signatory_name} onChange={set("signatory_name")} /></F>
-            <F label="Title (optional)" hint="Leave empty to print only the name."><input name="signatory_title" value={o.signatory_title} onChange={set("signatory_title")} /></F>
+            <F label={lor ? "Designation (optional)" : "Title (optional)"} hint={lor ? "Printed under your name, as in the usual LOR format. Leave empty to print only the name." : "Leave empty to print only the name."}><input name="signatory_title" value={o.signatory_title} onChange={set("signatory_title")} /></F>
           </div>
           <F label="Signature (optional)" hint="Photo or scan of the signature on white paper. It is remembered for the next letter.">
             <div className="ol-sig-box">

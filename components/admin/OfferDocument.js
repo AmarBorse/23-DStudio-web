@@ -96,21 +96,51 @@ export default function OfferDocument({ o }) {
   if (type === "internship") return <InternshipLetter o={o} />;
   if (type === "completion") return <CompletionLetter o={o} />;
   if (type === "certificate") return <Certificate o={o} />;
+  if (type === "recommendation") return <RecommendationLetter o={o} />;
   return <JobLetter o={o} />;
 }
 
 // Internship completion: one page — studio and date, "To whom it may concern", certificate text, signature
-function CompletionLetter({ o }) {
+// (also used for letters of recommendation, with their own title)
+function CompletionLetter({ o, title = "INTERNSHIP COMPLETION LETTER", extra = "" }) {
   return (
-    <article className="ol ol-intern ol-done" aria-label={`Internship completion letter ${o.number || ""}`} style={style}>
+    <article className={`ol ol-intern ol-done ${extra}`} aria-label={`${title.toLowerCase()} ${o.number || ""}`} style={style}>
       <Background />
-      <Head title="INTERNSHIP COMPLETION LETTER" />
+      <Head title={title} />
       <StudioAndDate o={o} />
       <p className="ol-concern">{COMPLETION_DEFAULTS.heading}</p>
       <section className="ol-body">
         {letterParagraphs(o).map((parts, i) => <p key={i}><Rich parts={parts} /></p>)}
       </section>
       <Signature o={o} />
+      <div className="ol-contact-row"><Contact /></div>
+    </article>
+  );
+}
+
+// Letter of recommendation: date, salutation, four paragraphs, then the recommender's name, designation, organisation and contact
+function RecommendationLetter({ o }) {
+  return (
+    <article className="ol ol-intern ol-done ol-lor" aria-label={`Letter of recommendation ${o.number || ""}`} style={style}>
+      <Background />
+      <Head title="LETTER OF RECOMMENDATION" />
+      <StudioAndDate o={o} />
+      <section className="ol-body">
+        <p className="ol-salute">{o.greeting_name || "To Whom It May Concern,"}</p>
+        {letterParagraphs(o).map((parts, i) => <p key={i}><Rich parts={parts} /></p>)}
+      </section>
+      <div className="ol-sign">
+        <p>{o.closing}</p>
+        <div className="ol-signature">
+          {o.signature && <img src={o.signature} alt="" />}
+          {o.stamp && <img className="ol-stamp" src={o.stamp} alt="" />}
+        </div>
+        <p className="ol-strong">{o.signatory_name}</p>
+        {o.signatory_title && <p>{o.signatory_title}</p>}
+        <p>{COMPANY.name}</p>
+        <p>Email: {COMPANY.email}</p>
+        <p>Contact: {COMPANY.phone}</p>
+      </div>
       <div className="ol-contact-row"><Contact /></div>
     </article>
   );

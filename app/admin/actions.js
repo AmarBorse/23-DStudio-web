@@ -191,8 +191,6 @@ export async function saveQuote(_prev, formData) {
   try {
     const all = await quotations.list();
     const same = all.find((x) => x.number === row.number && x.id !== id);
-    // the stamp column comes with update-8.sql: only send it when a stamp is (or was) set
-    if (imageUrl(stamp) || (id && all.find((x) => x.id === id)?.stamp)) row.stamp = imageUrl(stamp);
     if (same) return { error: `Quote number ${row.number} is already used (client: ${same.client_name}). Please use another number.` };
     if (id) {
       const before = all.find((x) => x.id === id);
@@ -325,8 +323,6 @@ export async function saveInvoice(_prev, formData) {
   try {
     const all = await invoices.list();
     const same = all.find((x) => x.number === row.number && x.id !== id);
-    // the stamp column comes with update-8.sql: only send it when a stamp is (or was) set
-    if (imageUrl(stamp) || (id && all.find((x) => x.id === id)?.stamp)) row.stamp = imageUrl(stamp);
     if (same) return { error: `Invoice number ${row.number} is already used (billed to ${same.client_name}). Please use another number.` };
     if (id) {
       const before = all.find((x) => x.id === id);
@@ -410,7 +406,7 @@ const OFFER_LABELS = {
   work_location: "Location", salary: "Salary", benefits: "Benefits", accept_by: "Accept by", body: "Letter text", closing: "Closing",
   signatory_name: "Signed by", signatory_title: "Signatory title", signature: "Signature", stamp: "Stamp", private_notes: "Private notes",
   letter_type: "Letter type", department: "Department", end_date: "End date", duration: "Duration", work_mode: "Work mode",
-  working_hours: "Working hours", notice: "Notice period", about: "About text", responsibilities: "Responsibilities", terms: "Terms",
+  working_hours: "Working hours", notice: "Notice period", about: "Specific example", pronoun: "Refer to as", responsibilities: "Responsibilities", terms: "Terms",
 };
 const offerChanges = (a, b) =>
   Object.keys(OFFER_LABELS).filter((k) => JSON.stringify(a?.[k] ?? "") !== JSON.stringify(b?.[k] ?? "")).map((k) => OFFER_LABELS[k]);
@@ -461,7 +457,7 @@ export async function saveOffer(_prev, formData) {
   if (isAfterInternship(row.letter_type) && (!row.start_date || !row.end_date))
     return { error: "Please enter the internship start and end dates." };
   if (isAfterInternship(row.letter_type) && row.end_date && row.letter_date && row.letter_date < row.end_date)
-    return { error: `A completion ${row.letter_type === "certificate" ? "certificate" : "letter"} can only be dated on or after the internship’s end date.` };
+    return { error: `${{ certificate: "A completion certificate", recommendation: "A recommendation letter" }[row.letter_type] || "A completion letter"} can only be dated on or after the internship’s end date.` };
   if (!row.number) return { error: "Please enter a reference number." };
   if (!row.candidate_name) return { error: "Please enter the candidate’s name." };
   if (!row.position) return { error: "Please enter the position." };
@@ -472,8 +468,11 @@ export async function saveOffer(_prev, formData) {
   try {
     const all = await offerLetters.list();
     const same = all.find((x) => x.number === row.number && x.id !== id);
-    // the stamp column comes with update-8.sql: only send it when a stamp is (or was) set
-    if (imageUrl(stamp) || (id && all.find((x) => x.id === id)?.stamp)) row.stamp = imageUrl(stamp);
+    // the stamp and pronoun columns come with update-8.sql: only send them when set (or set before)
+    const prev = id ? all.find((x) => x.id === id) : null;
+    if (imageUrl(stamp) || prev?.stamp) row.stamp = imageUrl(stamp);
+    const pronoun = ["she", "he"].includes(text("pronoun")) ? text("pronoun") : "";
+    if (pronoun || prev?.pronoun) row.pronoun = pronoun;
     if (same) return { error: `Reference ${row.number} is already used (${same.candidate_name}). Please use another number.` };
     if (id) {
       const before = all.find((x) => x.id === id);
@@ -489,8 +488,8 @@ export async function saveOffer(_prev, formData) {
     }
   } catch (e) {
     console.error(e);
-    if (/stamp/i.test(String(e.message)))
-      return { error: "The database needs the stamp update: run supabase/update-8.sql in the Supabase SQL Editor." };
+    if (/stamp|pronoun/i.test(String(e.message)))
+      return { error: "The database needs an update: run supabase/update-8.sql in the Supabase SQL Editor (it is safe to run again)." };
     if (/letter_type|department|end_date|work_mode|working_hours|notice|responsibilities|terms|about/i.test(String(e.message)))
       return { error: "The database needs the internship update: run supabase/update-7.sql in the Supabase SQL Editor." };
     if (/offer_letters|relation|column/i.test(String(e.message))) return { error: "The database needs the offer letters update: run supabase/update-6.sql in the Supabase SQL Editor." };
