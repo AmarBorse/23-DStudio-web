@@ -4,7 +4,7 @@ import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 import { saveOffer } from "@/app/admin/actions";
 import OfferDocument from "@/components/admin/OfferDocument";
-import { OFFER_STATUSES, OFFER_TYPES, PLACEHOLDERS, INTERNSHIP_PLACEHOLDERS, COMPLETION_PLACEHOLDERS, firstName, durationText, offerType } from "@/lib/offer";
+import { OFFER_STATUSES, OFFER_TYPES, PLACEHOLDERS, INTERNSHIP_PLACEHOLDERS, COMPLETION_PLACEHOLDERS, CERTIFICATE_PLACEHOLDERS, firstName, durationText, offerType } from "@/lib/offer";
 import { addDays } from "@/lib/quote";
 import { uploadImage } from "@/components/admin/upload";
 
@@ -20,14 +20,16 @@ export default function OfferForm({ offer, defaults }) {
   const [state, action, pending] = useActionState(saveOffer, null);
   const [o, setO] = useState(() => ({ ...defaults, ...offer, letter_type: offerType(offer || defaults) }));
   const intern = o.letter_type === "internship";
-  const done = o.letter_type === "completion";
+  const cert = o.letter_type === "certificate";
+  const done = o.letter_type === "completion" || cert; // issued after the internship
   const std = defaults.standard[o.letter_type];
-  const NAMES = { job: "offer letter", internship: "internship offer", completion: "completion letter" };
+  const NAMES = { job: "offer letter", internship: "internship offer", completion: "completion letter", certificate: "certificate" };
   // fields each type shows; the rest are sent as hidden inputs so nothing is lost when saving
   const SHOWN = {
     job: ["position", "start_date", "reporting_to", "work_location", "salary", "accept_by", "benefits", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"],
     internship: ["position", "department", "start_date", "end_date", "duration", "work_mode", "working_hours", "reporting_to", "salary", "accept_by", "responsibilities", "terms", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"],
     completion: ["position", "department", "start_date", "end_date", "duration", "reporting_to", "responsibilities"],
+    certificate: ["position", "department", "start_date", "end_date", "duration"],
   }[o.letter_type];
   const ALL = ["position", "department", "start_date", "end_date", "duration", "work_mode", "working_hours", "work_location", "reporting_to", "salary", "accept_by", "benefits", "responsibilities", "notice", "about", "terms", "greeting_name", "candidate_address", "candidate_email", "candidate_phone"];
   const hidden = ALL.filter((k) => !SHOWN.includes(k));
@@ -59,6 +61,7 @@ export default function OfferForm({ offer, defaults }) {
   const bodyRef = useRef(null);
   const termsRef = useRef(null);
   const sigInput = useRef(null);
+  const stampInput = useRef(null);
 
   const set = (k) => (e) => {
     const v = e.target.value;
@@ -88,13 +91,13 @@ export default function OfferForm({ offer, defaults }) {
     requestAnimationFrame(() => { el.focus(); el.setSelectionRange(start + tag.length, start + tag.length); });
   };
 
-  const pickSignature = async (f) => {
+  const pickImage = async (f, field = "signature") => {
     if (!f) return;
     setSigErr("");
     setSigBusy(true);
     try {
       const img = await uploadImage(f);
-      setO((p) => ({ ...p, signature: img.src }));
+      setO((p) => ({ ...p, [field]: img.src }));
     } catch (e) {
       setSigErr(e.message);
     } finally {
@@ -111,6 +114,7 @@ export default function OfferForm({ offer, defaults }) {
         </div>
         {offer && <input type="hidden" name="id" value={offer.id} />}
         <input type="hidden" name="signature" value={o.signature || ""} />
+        <input type="hidden" name="stamp" value={o.stamp || ""} />
         <input type="hidden" name="letter_type" value={o.letter_type} />
 
         <section className="adm-card pf-card">
@@ -123,21 +127,24 @@ export default function OfferForm({ offer, defaults }) {
             ))}
           </div>
           <p className="pf-hint">
-            {done
+            {cert
+              ? "A4 landscape certificate: the intern’s name in large script, the internship details, date of issue, certificate number and your signature."
+              : done
               ? "One page, issued after the internship: “To whom it may concern”, the certificate text and your signature."
               : intern
                 ? "One page: date, candidate, offer letter, your signature, and an acceptance box for the candidate to sign."
                 : "One page, like the Canva Job Offer Letter template."}
           </p>
-          {o.source_number && <p className="adm-ok">Details copied from internship offer {o.source_number}. Check the dates before saving.</p>}
+          {o.source_number && <p className="adm-ok">Details copied from {o.source_kind || "internship offer"} {o.source_number}. Check the dates before saving.</p>}
           <input type="hidden" name="source_number" value={o.source_number || ""} />
+          <input type="hidden" name="source_kind" value={o.source_kind || ""} />
         </section>
 
         <section className="adm-card pf-card">
           <h2 className="pf-card-title">Letter details</h2>
           <div className="pf-two">
-            <F label="Reference No *"><input name="number" value={o.number} onChange={set("number")} required /></F>
-            <F label="Date *"><input type="date" name="letter_date" value={o.letter_date || ""} onChange={set("letter_date")} required /></F>
+            <F label={cert ? "Certificate No *" : "Reference No *"}><input name="number" value={o.number} onChange={set("number")} required /></F>
+            <F label={cert ? "Date of issue *" : "Date *"}><input type="date" name="letter_date" value={o.letter_date || ""} onChange={set("letter_date")} required /></F>
             <F label="Status">
               <select name="status" value={o.status} onChange={set("status")}>
                 {OFFER_STATUSES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
@@ -176,11 +183,13 @@ export default function OfferForm({ offer, defaults }) {
               <F label="Duration" hint="Leave empty to work it out from the dates.">
                 <input name="duration" value={o.duration} onChange={set("duration")} placeholder={durationText(o.start_date, o.end_date) || "e.g. 6 months"} />
               </F>
-              <F label="Supervisor"><input name="reporting_to" value={o.reporting_to} onChange={set("reporting_to")} placeholder="e.g. Gaurav Duse" /></F>
+              {!cert && <F label="Supervisor"><input name="reporting_to" value={o.reporting_to} onChange={set("reporting_to")} placeholder="e.g. Gaurav Duse" /></F>}
             </div>
-            <F label="Work done (used in the letter)" hint="Completes the sentence “During the internship, {first_name} assisted the team with …”.">
-              <textarea name="responsibilities" rows={3} value={o.responsibilities} onChange={set("responsibilities")} />
-            </F>
+            {!cert && (
+              <F label="Work done (used in the letter)" hint="Completes the sentence “During the internship, {first_name} assisted the team with …”.">
+                <textarea name="responsibilities" rows={3} value={o.responsibilities} onChange={set("responsibilities")} />
+              </F>
+            )}
           </section>
         ) : !intern ? (
           <section className="adm-card pf-card">
@@ -221,13 +230,13 @@ export default function OfferForm({ offer, defaults }) {
         {hidden.map((k) => <input key={k} type="hidden" name={k} value={o[k] || ""} />)}
 
         <section className="adm-card pf-card">
-          <F label="Letter text" hint="Leave an empty line between paragraphs. **two stars** make words bold. Click a field to insert it where the cursor is:">
+          <F label={cert ? "Certificate text" : "Letter text"} hint={`${cert ? "Printed under the name. " : ""}Leave an empty line between paragraphs. **two stars** make words bold. Click a field to insert it where the cursor is:`}>
             <span className="ol-help">
-              {Object.entries(done ? COMPLETION_PLACEHOLDERS : intern ? INTERNSHIP_PLACEHOLDERS : PLACEHOLDERS).map(([k, label]) => (
+              {Object.entries(cert ? CERTIFICATE_PLACEHOLDERS : done ? COMPLETION_PLACEHOLDERS : intern ? INTERNSHIP_PLACEHOLDERS : PLACEHOLDERS).map(([k, label]) => (
                 <code key={k} role="button" tabIndex={0} title={label} onClick={() => insert(k, "body")} onKeyDown={(e) => e.key === "Enter" && insert(k, "body")}>{`{${k}}`}</code>
               ))}
             </span>
-            <textarea ref={bodyRef} name="body" rows={intern ? 14 : done ? 10 : 11} value={o.body} onChange={set("body")} />
+            <textarea ref={bodyRef} name="body" rows={intern ? 14 : cert ? 6 : done ? 10 : 11} value={o.body} onChange={set("body")} />
           </F>
           <button type="button" className="adm-btn ghost" onClick={() => confirm("Replace this text with the standard text?") && setO((p) => ({ ...p, body: std.body }))}>Reset to standard text</button>
         </section>
@@ -244,7 +253,7 @@ export default function OfferForm({ offer, defaults }) {
         <section className="adm-card pf-card">
           <h2 className="pf-card-title">Signed by</h2>
           <div className="pf-two">
-            <F label="Closing"><input name="closing" value={o.closing} onChange={set("closing")} /></F>
+            {cert ? <input type="hidden" name="closing" value={o.closing || ""} /> : <F label="Closing"><input name="closing" value={o.closing} onChange={set("closing")} /></F>}
             <F label="Name"><input name="signatory_name" value={o.signatory_name} onChange={set("signatory_name")} /></F>
             <F label="Title (optional)" hint="Leave empty to print only the name."><input name="signatory_title" value={o.signatory_title} onChange={set("signatory_title")} /></F>
           </div>
@@ -254,10 +263,19 @@ export default function OfferForm({ offer, defaults }) {
               {o.signature && <img src={o.signature} alt="Signature" />}
               <button type="button" className={`adm-btn ghost${sigBusy ? " is-busy" : ""}`} onClick={() => sigInput.current?.click()} disabled={sigBusy}>{o.signature ? "Replace" : "Upload signature"}</button>
               {o.signature && <button type="button" className="adm-btn ghost" onClick={() => setO((p) => ({ ...p, signature: "" }))}>Remove</button>}
-              <input ref={sigInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { pickSignature(e.target.files[0]); e.target.value = ""; }} />
+              <input ref={sigInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { pickImage(e.target.files[0], "signature"); e.target.value = ""; }} />
             </div>
-            {sigErr && <p className="adm-error" role="alert">{sigErr}</p>}
           </F>
+          <F label="Studio stamp (optional)" hint={cert ? "Photo or scan of the rubber stamp on white paper (PNG with a clear background looks best). Printed in the middle instead of the round 23D seal. Remembered for the next letter." : "Photo or scan of the rubber stamp on white paper (PNG with a clear background looks best). Printed next to the signature. Remembered for the next letter."}>
+            <div className="ol-sig-box">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {o.stamp && <img src={o.stamp} alt="Stamp" />}
+              <button type="button" className={`adm-btn ghost${sigBusy ? " is-busy" : ""}`} onClick={() => stampInput.current?.click()} disabled={sigBusy}>{o.stamp ? "Replace" : "Upload stamp"}</button>
+              {o.stamp && <button type="button" className="adm-btn ghost" onClick={() => setO((p) => ({ ...p, stamp: "" }))}>Remove</button>}
+              <input ref={stampInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { pickImage(e.target.files[0], "stamp"); e.target.value = ""; }} />
+            </div>
+          </F>
+          {sigErr && <p className="adm-error" role="alert">{sigErr}</p>}
           <F label="Private notes" hint="Only for you, not printed.">
             <textarea name="private_notes" rows={2} value={o.private_notes} onChange={set("private_notes")} />
           </F>

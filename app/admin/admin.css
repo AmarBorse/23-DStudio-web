@@ -572,3 +572,49 @@ html.anim .qh-timeline li:nth-child(n+4){animation-delay:.15s}
 .ol-brand{flex:none}
 .ol-brand span{white-space:nowrap}
 .ol-done .ol-title{font-size:19.5pt}
+
+/* ---------- internship completion certificate (A4 landscape) ---------- */
+@font-face{font-family:"Great Vibes";src:url("/fonts/great-vibes-latin-400-normal.woff2") format("woff2");font-weight:400;font-display:block}
+.oc{position:relative;box-sizing:border-box;width:297mm;height:210mm;background:#fff;color:#1b1b1b;font-family:var(--avenir);overflow:hidden;page:cert}
+.oc-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.oc-in{position:relative;height:100%;box-sizing:border-box;padding:25mm 34mm 26mm;display:flex;flex-direction:column;align-items:center;text-align:center}
+.oc-brand{display:flex;align-items:center;gap:3mm}
+.oc-brand img{height:13mm;width:auto}
+.oc-brand span{font-family:var(--spartan);font-weight:700;font-size:8.4pt;line-height:1.15;letter-spacing:.02em;text-align:left;white-space:nowrap}
+.oc-title{margin:6mm 0 0;font-family:var(--spartan);font-weight:700;font-size:38pt;line-height:1;letter-spacing:.16em;text-indent:.16em}
+.oc-sub{margin:3mm 0 0;display:flex;align-items:center;gap:4mm;font-family:var(--spartan);font-weight:700;font-size:12pt;letter-spacing:.3em;color:var(--ol-a)}
+.oc-sub span{padding-left:.3em}
+.oc-sub::before,.oc-sub::after{content:"";width:22mm;height:1px;background:var(--ol-b)}
+.oc-presented{margin:8mm 0 0;font-size:11pt;letter-spacing:.08em;text-transform:uppercase;color:#555}
+.oc-name{margin:3mm 0 0;min-width:150mm;padding:0 8mm 2.5mm;border-bottom:1px solid #bdbdbd;font-family:"Great Vibes",cursive;font-size:46pt;line-height:1.2;word-spacing:.14em;color:#1b1b1b}
+.oc-name.m{font-size:40pt}
+.oc-name.s{font-size:34pt}
+.oc-name.xs{font-size:28pt}
+.oc-body{margin-top:6mm;max-width:200mm;font-size:12.2pt;line-height:1.55}
+.oc-body p + p{margin-top:2mm}
+.oc-body strong{font-weight:800;white-space:nowrap}
+.oc-foot{margin-top:auto;width:100%;display:grid;grid-template-columns:1fr 32mm 1fr;align-items:start;gap:10mm}
+.oc-foot > .oc-seal,.oc-foot > .oc-stamp{align-self:center}
+.oc-col{display:flex;flex-direction:column;align-items:center;justify-self:center;width:66mm}
+.oc-val{font-weight:800;font-size:11.5pt;padding-bottom:1.6mm;margin:0}
+.oc-label{width:100%;padding-top:1.6mm;border-top:1px solid #1b1b1b;font-family:var(--spartan);font-weight:700;font-size:10pt;letter-spacing:.06em}
+.oc-signer{text-transform:none;letter-spacing:.02em;font-size:11pt}
+.oc-no{margin-top:1mm;font-size:9pt;color:#555}
+.oc-signature{height:16mm;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.oc-signature img{max-height:16mm;max-width:56mm;object-fit:contain;mix-blend-mode:multiply}
+.oc-seal{width:30mm;height:30mm;display:block;margin-bottom:1mm}
+.qf-preview-paper > .oc{zoom:.38}
+.qp:has(.oc){max-width:1140px}
+@media screen and (max-width: 1560px){.qp-paper > .oc{zoom:.85}}
+@media screen and (max-width: 1250px){.qp-paper > .oc{zoom:.62}}
+@media (max-width: 1250px){.qf-preview-paper > .oc{zoom:.5}}
+@media (max-width: 800px){.qf-preview-paper > .oc{zoom:.3}}
+.ol-type.certificate{background:#fff4dc;color:#8a5a00}
+@page cert{size:A4 landscape;margin:0}
+@media print{.oc{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+
+/* studio stamp (uploaded): beside the signature on letters, in the middle of the certificate */
+.ol-signature{position:relative}
+.ol .ol-signature img.ol-stamp{position:absolute;left:44mm;top:50%;transform:translateY(-50%) rotate(-6deg);height:28mm;max-height:none;width:auto;max-width:40mm;object-fit:contain;mix-blend-mode:multiply;opacity:.92}
+.oc-stamp{width:32mm;height:32mm;object-fit:contain;mix-blend-mode:multiply;transform:rotate(-6deg);opacity:.92;margin-bottom:1mm}
+.ol-sig-box img[alt="Stamp"]{max-height:64px}

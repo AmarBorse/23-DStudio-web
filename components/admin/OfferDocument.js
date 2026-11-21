@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import { COMPANY, OFFER_DEFAULTS, COMPLETION_DEFAULTS } from "@/lib/company";
-import { letterParagraphs, longDate, firstName, offerType, fillPlaceholders } from "@/lib/offer";
+import { COMPANY, OFFER_DEFAULTS, COMPLETION_DEFAULTS, CERTIFICATE_DEFAULTS } from "@/lib/company";
+import { letterParagraphs, longDate, firstName, titleName, offerType, fillPlaceholders } from "@/lib/offer";
 import { boldParts } from "@/lib/invoice";
 
 const lines = (t) => String(t || "").split("\n").map((s) => s.trim()).filter(Boolean);
@@ -79,7 +79,10 @@ const To = ({ o }) => (
 const Signature = ({ o }) => (
   <div className="ol-sign">
     <p>{o.closing}</p>
-    <div className="ol-signature">{o.signature && <img src={o.signature} alt="" />}</div>
+    <div className="ol-signature">
+      {o.signature && <img src={o.signature} alt="" />}
+      {o.stamp && <img className="ol-stamp" src={o.stamp} alt="" />}
+    </div>
     <p className="ol-strong">{o.signatory_name}</p>
     {o.signatory_title && <p>{o.signatory_title}</p>}
     <p>{COMPANY.name}</p>
@@ -92,6 +95,7 @@ export default function OfferDocument({ o }) {
   const type = offerType(o);
   if (type === "internship") return <InternshipLetter o={o} />;
   if (type === "completion") return <CompletionLetter o={o} />;
+  if (type === "certificate") return <Certificate o={o} />;
   return <JobLetter o={o} />;
 }
 
@@ -160,3 +164,73 @@ function InternshipLetter({ o }) {
     </article>
   );
 }
+
+// Internship completion certificate: A4 landscape, brand corners, double frame, name in script, seal and signature
+function Certificate({ o }) {
+  return (
+    <article className="oc" aria-label={`Internship completion certificate ${o.number || ""}`} style={style}>
+      <svg className="oc-bg" viewBox="0 0 297 210" preserveAspectRatio="none" aria-hidden="true">
+        <image href="/images/logo-black.png" x="103.5" y="57" width="90" height="85" opacity="0.035" preserveAspectRatio="xMidYMid meet" />
+        <path d="M0 0 H92 L83 9 H0 Z" fill="var(--ol-a)" />
+        <path d="M0 11 H50 L46.5 14.5 H0 Z" fill="var(--ol-b)" />
+        <path d="M232 0 H297 V6 H226 Z" fill="var(--ol-b)" />
+        <path d="M297 210 H205 L214 201 H297 Z" fill="var(--ol-a)" />
+        <path d="M297 199 H247 L250.5 195.5 H297 Z" fill="var(--ol-b)" />
+        <path d="M0 210 V204 H71 L65 210 Z" fill="var(--ol-b)" />
+        <rect x="13" y="17" width="271" height="176" fill="none" stroke="var(--ol-a)" strokeWidth="0.7" />
+        <rect x="15.5" y="19.5" width="266" height="171" fill="none" stroke="var(--ol-b)" strokeWidth="0.35" />
+      </svg>
+
+      <div className="oc-in">
+        <div className="oc-brand">
+          <img src="/images/logo-black.png" alt="23D Studio" />
+          <span>TWENTY-THREE D<br />STUDIO</span>
+        </div>
+        <h1 className="oc-title">{CERTIFICATE_DEFAULTS.title}</h1>
+        <p className="oc-sub"><span>{CERTIFICATE_DEFAULTS.subtitle}</span></p>
+        <p className="oc-presented">{CERTIFICATE_DEFAULTS.presented}</p>
+        <p className={`oc-name${nameSize(o.candidate_name)}`}>{titleName(o.candidate_name)}</p>
+        <section className="oc-body">
+          {letterParagraphs(o).map((parts, i) => <p key={i}><Rich parts={parts} /></p>)}
+        </section>
+
+        <footer className="oc-foot">
+          <div className="oc-col">
+            <div className="oc-signature"><p className="oc-val">{longDate(o.letter_date)}</p></div>
+            <p className="oc-label">Date of issue</p>
+            {o.number && <p className="oc-no">Certificate No: {o.number}</p>}
+          </div>
+          {o.stamp ? <img className="oc-stamp" src={o.stamp} alt="" /> : <Seal />}
+          <div className="oc-col">
+            <div className="oc-signature">{o.signature && <img src={o.signature} alt="" />}</div>
+            <p className="oc-label oc-signer">{o.signatory_name}</p>
+            {o.signatory_title && <p className="oc-no">{o.signatory_title}</p>}
+            <p className="oc-no">{COMPANY.name}</p>
+          </div>
+        </footer>
+      </div>
+    </article>
+  );
+}
+
+// smaller script for long names so they stay on one line
+const nameSize = (n) => {
+  const len = String(n || "").trim().length;
+  return len > 40 ? " xs" : len > 32 ? " s" : len > 26 ? " m" : "";
+};
+
+// round studio seal in the brand colours
+const Seal = () => (
+  <svg className="oc-seal" viewBox="0 0 100 100" aria-hidden="true">
+    <defs>
+      <path id="oc-ring" d="M50 50 m-35 0 a35 35 0 1 1 70 0 a35 35 0 1 1 -70 0" />
+    </defs>
+    <circle cx="50" cy="50" r="48" fill="var(--ol-b)" />
+    <circle cx="50" cy="50" r="45" fill="var(--ol-a)" />
+    <circle cx="50" cy="50" r="27" fill="none" stroke="#fff" strokeWidth="0.8" strokeDasharray="1.6 1.6" />
+    <text fontSize="7.2" fontWeight="700" fill="#fff" style={{ fontFamily: "var(--spartan)" }}>
+      <textPath href="#oc-ring" startOffset="0" textLength="216" lengthAdjust="spacing">TWENTY-THREE D STUDIO ★ INTERNSHIP ★</textPath>
+    </text>
+    <image href="/images/logo-white.png" x="33" y="34" width="34" height="32" preserveAspectRatio="xMidYMid meet" />
+  </svg>
+);

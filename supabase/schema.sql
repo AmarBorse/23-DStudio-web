@@ -140,6 +140,7 @@ create table if not exists offer_letters (
   signatory_name text not null default '',
   signatory_title text not null default '',
   signature text not null default '',
+  stamp text not null default '',
   private_notes text not null default '',
   status text not null default 'draft',
   history jsonb not null default '[]'

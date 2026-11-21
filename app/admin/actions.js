@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, startSession, endSession, requireAdmin, loginConfigured } from "@/lib/auth";
 import { projects, team, enquiries, quotations, invoices, offerLetters } from "@/lib/store";
-import { nextOfferNumber, offerStatusLabel } from "@/lib/offer";
+import { nextOfferNumber, offerStatusLabel, offerType, isAfterInternship, OFFER_TYPE_IDS } from "@/lib/offer";
 import { nextInvoiceNumber, invoiceStatusLabel, invoiceTotals } from "@/lib/invoice";
 import { nextQuoteNumber, todayISO, addDays, changedFields, historyEntry, statusLabel } from "@/lib/quote";
 import { QUOTE_DEFAULTS, INVOICE_DEFAULTS, OFFER_DEFAULTS } from "@/lib/company";
@@ -191,6 +191,8 @@ export async function saveQuote(_prev, formData) {
   try {
     const all = await quotations.list();
     const same = all.find((x) => x.number === row.number && x.id !== id);
+    // the stamp column comes with update-8.sql: only send it when a stamp is (or was) set
+    if (imageUrl(stamp) || (id && all.find((x) => x.id === id)?.stamp)) row.stamp = imageUrl(stamp);
     if (same) return { error: `Quote number ${row.number} is already used (client: ${same.client_name}). Please use another number.` };
     if (id) {
       const before = all.find((x) => x.id === id);
@@ -323,6 +325,8 @@ export async function saveInvoice(_prev, formData) {
   try {
     const all = await invoices.list();
     const same = all.find((x) => x.number === row.number && x.id !== id);
+    // the stamp column comes with update-8.sql: only send it when a stamp is (or was) set
+    if (imageUrl(stamp) || (id && all.find((x) => x.id === id)?.stamp)) row.stamp = imageUrl(stamp);
     if (same) return { error: `Invoice number ${row.number} is already used (billed to ${same.client_name}). Please use another number.` };
     if (id) {
       const before = all.find((x) => x.id === id);
@@ -404,7 +408,7 @@ const OFFER_LABELS = {
   number: "Ref No", letter_date: "Date", candidate_name: "Candidate", candidate_address: "Address", candidate_email: "Email",
   candidate_phone: "Phone", greeting_name: "Greeting", position: "Position", start_date: "Joining date", reporting_to: "Reports to",
   work_location: "Location", salary: "Salary", benefits: "Benefits", accept_by: "Accept by", body: "Letter text", closing: "Closing",
-  signatory_name: "Signed by", signatory_title: "Signatory title", signature: "Signature", private_notes: "Private notes",
+  signatory_name: "Signed by", signatory_title: "Signatory title", signature: "Signature", stamp: "Stamp", private_notes: "Private notes",
   letter_type: "Letter type", department: "Department", end_date: "End date", duration: "Duration", work_mode: "Work mode",
   working_hours: "Working hours", notice: "Notice period", about: "About text", responsibilities: "Responsibilities", terms: "Terms",
 };
@@ -417,6 +421,8 @@ export async function saveOffer(_prev, formData) {
   const text = (k, max = 300) => String(formData.get(k) || "").trim().slice(0, max);
   const date = (k) => text(k, 10) || null;
   const signature = text("signature", 1000);
+  const stamp = text("stamp", 1000);
+  const imageUrl = (u) => (/^(https:\/\/|\/media\/|\/images\/)/.test(u) ? u : "");
   const row = {
     number: text("number", 30),
     letter_date: date("letter_date"),
@@ -436,10 +442,10 @@ export async function saveOffer(_prev, formData) {
     closing: text("closing", 80),
     signatory_name: text("signatory_name", 120),
     signatory_title: text("signatory_title", 120),
-    signature: /^(https:\/\/|\/media\/|\/images\/)/.test(signature) ? signature : "",
+    signature: imageUrl(signature),
     private_notes: text("private_notes", 2000),
     status: OFFER_STATUS_IDS.includes(text("status")) ? text("status") : "draft",
-    letter_type: ["internship", "completion"].includes(text("letter_type")) ? text("letter_type") : "job",
+    letter_type: OFFER_TYPE_IDS.includes(text("letter_type")) ? text("letter_type") : "job",
     department: text("department", 120),
     end_date: date("end_date"),
     duration: text("duration", 60),
@@ -452,10 +458,10 @@ export async function saveOffer(_prev, formData) {
   };
   if (row.letter_type !== "job" && row.start_date && row.end_date && row.end_date < row.start_date)
     return { error: "The internship end date is before the start date." };
-  if (row.letter_type === "completion" && (!row.start_date || !row.end_date))
+  if (isAfterInternship(row.letter_type) && (!row.start_date || !row.end_date))
     return { error: "Please enter the internship start and end dates." };
-  if (row.letter_type === "completion" && row.end_date && row.letter_date && row.letter_date < row.end_date)
-    return { error: "A completion letter can only be dated on or after the internship’s end date." };
+  if (isAfterInternship(row.letter_type) && row.end_date && row.letter_date && row.letter_date < row.end_date)
+    return { error: `A completion ${row.letter_type === "certificate" ? "certificate" : "letter"} can only be dated on or after the internship’s end date.` };
   if (!row.number) return { error: "Please enter a reference number." };
   if (!row.candidate_name) return { error: "Please enter the candidate’s name." };
   if (!row.position) return { error: "Please enter the position." };
@@ -466,6 +472,8 @@ export async function saveOffer(_prev, formData) {
   try {
     const all = await offerLetters.list();
     const same = all.find((x) => x.number === row.number && x.id !== id);
+    // the stamp column comes with update-8.sql: only send it when a stamp is (or was) set
+    if (imageUrl(stamp) || (id && all.find((x) => x.id === id)?.stamp)) row.stamp = imageUrl(stamp);
     if (same) return { error: `Reference ${row.number} is already used (${same.candidate_name}). Please use another number.` };
     if (id) {
       const before = all.find((x) => x.id === id);
@@ -476,10 +484,13 @@ export async function saveOffer(_prev, formData) {
       saved = await offerLetters.update(id, { ...row, history });
     } else {
       const from = text("source_number", 30);
-      saved = await offerLetters.insert({ ...row, history: [historyEntry("created", `${row.position} · ${offerStatusLabel(row.status)}${from ? ` · from internship offer ${from}` : ""}`)] });
+      const kind = text("source_kind", 30) || "internship offer";
+      saved = await offerLetters.insert({ ...row, history: [historyEntry("created", `${row.position} · ${offerStatusLabel(row.status)}${from ? ` · from ${kind} ${from}` : ""}`)] });
     }
   } catch (e) {
     console.error(e);
+    if (/stamp/i.test(String(e.message)))
+      return { error: "The database needs the stamp update: run supabase/update-8.sql in the Supabase SQL Editor." };
     if (/letter_type|department|end_date|work_mode|working_hours|notice|responsibilities|terms|about/i.test(String(e.message)))
       return { error: "The database needs the internship update: run supabase/update-7.sql in the Supabase SQL Editor." };
     if (/offer_letters|relation|column/i.test(String(e.message))) return { error: "The database needs the offer letters update: run supabase/update-6.sql in the Supabase SQL Editor." };
@@ -511,7 +522,7 @@ export async function duplicateOffer(formData) {
   if (!o) return;
   const all = await offerLetters.list();
   const { id: _id, created_at: _c, ...rest } = o;
-  const number = nextOfferNumber(all, ["internship", "completion"].includes(o.letter_type) ? o.letter_type : "job");
+  const number = nextOfferNumber(all, offerType(o));
   const today = todayISO();
   const copy = await offerLetters.insert({
     ...rest,

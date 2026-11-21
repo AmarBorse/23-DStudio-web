@@ -8,7 +8,7 @@ import PrintButton from "@/components/admin/PrintButton";
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const o = await offerLetters.get("id", id).catch(() => null);
-  const kind = { internship: "Internship Offer", completion: "Internship Completion" }[o?.letter_type] || "Offer Letter";
+  const kind = { internship: "Internship Offer", completion: "Internship Completion", certificate: "Internship Certificate" }[o?.letter_type] || "Offer Letter";
   return { title: o ? `${kind} - ${o.candidate_name} - ${o.position}` : "Offer letter" };
 }
 

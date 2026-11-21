@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { offerLetters } from "@/lib/store";
 import { dmy, yearOf, quoteHistory } from "@/lib/quote";
-import { OFFER_STATUSES, longDate, offerType } from "@/lib/offer";
+import { OFFER_STATUSES, longDate, offerType, isAfterInternship } from "@/lib/offer";
 import { setOfferStatus, deleteOffer, duplicateOffer } from "@/app/admin/actions";
 import ConfirmButton from "@/components/admin/ConfirmButton";
 import SubmitButton from "@/components/admin/SubmitButton";
@@ -43,6 +43,7 @@ export default async function OffersAdmin({ searchParams }) {
       <div className="adm-head">
         <h1 className="adm-h1">Offer letters</h1>
         <div className="adm-actions">
+          <Link className="adm-btn ghost" href="/admin/offers/new?type=certificate">+ Certificate<LinkSpinner /></Link>
           <Link className="adm-btn ghost" href="/admin/offers/new?type=completion">+ Completion letter<LinkSpinner /></Link>
           <Link className="adm-btn ghost" href="/admin/offers/new?type=internship">+ Internship offer<LinkSpinner /></Link>
           <Link className="adm-btn" href="/admin/offers/new">+ Job offer<LinkSpinner /></Link>
@@ -85,9 +86,9 @@ export default async function OffersAdmin({ searchParams }) {
                 <li key={r.id} className="adm-card adm-row qa-row">
                   <div className="adm-grow">
                     <strong>{r.candidate_name}</strong>
-                    <span className={`ol-type ${offerType(r)}`}>{{ job: "Job", internship: "Internship", completion: "Completion" }[offerType(r)]}</span>{" "}
+                    <span className={`ol-type ${offerType(r)}`}>{{ job: "Job", internship: "Internship", completion: "Completion", certificate: "Certificate" }[offerType(r)]}</span>{" "}
                     <span className="adm-muted">· {r.number} · {dmy(r.letter_date)}</span>
-                    <div>{r.position}{r.salary && offerType(r) !== "completion" && <span className="adm-muted"> · {offerType(r) === "internship" ? `stipend ${r.salary}` : `${r.salary}/month`}</span>}</div>
+                    <div>{r.position}{r.salary && !isAfterInternship(offerType(r)) && <span className="adm-muted"> · {offerType(r) === "internship" ? `stipend ${r.salary}` : `${r.salary}/month`}</span>}</div>
                     <div className="qa-last">
                       {r.start_date && (offerType(r) !== "job" ? `${longDate(r.start_date)} – ${longDate(r.end_date)}` : `Joining ${longDate(r.start_date)}`)}
                       {r.accept_by && r.status === "sent" && ` · reply by ${longDate(r.accept_by)}`}
@@ -100,6 +101,9 @@ export default async function OffersAdmin({ searchParams }) {
                     <Link className="adm-btn ghost" href={`/admin/offers/${r.id}/print`}>Print / PDF<LinkSpinner /></Link>
                     {offerType(r) === "internship" && (
                       <Link className="adm-btn ghost" href={`/admin/offers/new?type=completion&from=${r.id}`}>Completion letter<LinkSpinner /></Link>
+                    )}
+                    {(offerType(r) === "internship" || offerType(r) === "completion") && (
+                      <Link className="adm-btn ghost" href={`/admin/offers/new?type=certificate&from=${r.id}`}>Certificate<LinkSpinner /></Link>
                     )}
                     <form action={duplicateOffer}><input type="hidden" name="id" value={r.id} /><SubmitButton>Use as template</SubmitButton></form>
                     <form action={deleteOffer}><input type="hidden" name="id" value={r.id} /><ConfirmButton message={`Delete the offer letter for ${r.candidate_name}? This cannot be undone.`}>Delete</ConfirmButton></form>
