@@ -83,7 +83,7 @@ export default async function OffersAdmin({ searchParams }) {
             {g.list.map((r) => {
               const last = quoteHistory(r).at(-1);
               return (
-                <li key={r.id} className="adm-card adm-row qa-row">
+                <li key={r.id} className="adm-card adm-row qa-row ol-row">
                   <div className="adm-grow">
                     <strong>{r.candidate_name}</strong>
                     <span className={`ol-type ${offerType(r)}`}>{{ job: "Job", internship: "Internship", completion: "Completion", certificate: "Certificate" }[offerType(r)]}</span>{" "}

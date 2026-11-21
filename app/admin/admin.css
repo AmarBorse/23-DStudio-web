@@ -618,3 +618,8 @@ html.anim .qh-timeline li:nth-child(n+4){animation-delay:.15s}
 .ol .ol-signature img.ol-stamp{position:absolute;left:44mm;top:50%;transform:translateY(-50%) rotate(-6deg);height:28mm;max-height:none;width:auto;max-width:40mm;object-fit:contain;mix-blend-mode:multiply;opacity:.92}
 .oc-stamp{width:32mm;height:32mm;object-fit:contain;mix-blend-mode:multiply;transform:rotate(-6deg);opacity:.92;margin-bottom:1mm}
 .ol-sig-box img[alt="Stamp"]{max-height:64px}
+
+/* offer letters list: keep the details readable; status and buttons move to the next line when space runs out */
+.ol-row{row-gap:12px}
+.ol-row > .adm-grow{flex:1 1 340px}
+.ol-row > .adm-actions{flex:0 1 auto}
