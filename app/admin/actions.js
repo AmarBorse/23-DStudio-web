@@ -3,10 +3,11 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, startSession, endSession, requireAdmin, loginConfigured } from "@/lib/auth";
-import { projects, team, enquiries, quotations, invoices } from "@/lib/store";
+import { projects, team, enquiries, quotations, invoices, offerLetters } from "@/lib/store";
+import { nextOfferNumber, offerStatusLabel } from "@/lib/offer";
 import { nextInvoiceNumber, invoiceStatusLabel, invoiceTotals } from "@/lib/invoice";
 import { nextQuoteNumber, todayISO, addDays, changedFields, historyEntry, statusLabel } from "@/lib/quote";
-import { QUOTE_DEFAULTS, INVOICE_DEFAULTS } from "@/lib/company";
+import { QUOTE_DEFAULTS, INVOICE_DEFAULTS, OFFER_DEFAULTS } from "@/lib/company";
 import { CATEGORIES } from "@/lib/categories";
 import { refreshPublicPages } from "@/lib/revalidate";
 
@@ -394,4 +395,132 @@ export async function duplicateInvoice(formData) {
   await invoices.update(inv.id, { history: withHistory(inv, historyEntry("duplicated", `Copied to new invoice ${number}`)) });
   revalidatePath("/admin/invoices");
   redirect(`/admin/invoices/${copy.id}`);
+}
+
+
+/* ---------- offer letters ---------- */
+const OFFER_STATUS_IDS = ["draft", "sent", "accepted", "declined", "withdrawn"];
+const OFFER_LABELS = {
+  number: "Ref No", letter_date: "Date", candidate_name: "Candidate", candidate_address: "Address", candidate_email: "Email",
+  candidate_phone: "Phone", greeting_name: "Greeting", position: "Position", start_date: "Joining date", reporting_to: "Reports to",
+  work_location: "Location", salary: "Salary", benefits: "Benefits", accept_by: "Accept by", body: "Letter text", closing: "Closing",
+  signatory_name: "Signed by", signatory_title: "Signatory title", signature: "Signature", private_notes: "Private notes",
+  letter_type: "Letter type", department: "Department", end_date: "End date", duration: "Duration", work_mode: "Work mode",
+  working_hours: "Working hours", notice: "Notice period", about: "About text", responsibilities: "Responsibilities", terms: "Terms",
+};
+const offerChanges = (a, b) =>
+  Object.keys(OFFER_LABELS).filter((k) => JSON.stringify(a?.[k] ?? "") !== JSON.stringify(b?.[k] ?? "")).map((k) => OFFER_LABELS[k]);
+
+export async function saveOffer(_prev, formData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const text = (k, max = 300) => String(formData.get(k) || "").trim().slice(0, max);
+  const date = (k) => text(k, 10) || null;
+  const signature = text("signature", 1000);
+  const row = {
+    number: text("number", 30),
+    letter_date: date("letter_date"),
+    candidate_name: text("candidate_name", 200),
+    candidate_address: text("candidate_address", 500),
+    candidate_email: text("candidate_email", 200),
+    candidate_phone: text("candidate_phone", 40),
+    greeting_name: text("greeting_name", 80),
+    position: text("position", 150),
+    start_date: date("start_date"),
+    reporting_to: text("reporting_to", 150),
+    work_location: text("work_location", 150),
+    salary: text("salary", 100),
+    benefits: text("benefits", 400),
+    accept_by: date("accept_by"),
+    body: text("body", 6000),
+    closing: text("closing", 80),
+    signatory_name: text("signatory_name", 120),
+    signatory_title: text("signatory_title", 120),
+    signature: /^(https:\/\/|\/media\/|\/images\/)/.test(signature) ? signature : "",
+    private_notes: text("private_notes", 2000),
+    status: OFFER_STATUS_IDS.includes(text("status")) ? text("status") : "draft",
+    letter_type: text("letter_type") === "internship" ? "internship" : "job",
+    department: text("department", 120),
+    end_date: date("end_date"),
+    duration: text("duration", 60),
+    work_mode: text("work_mode", 120),
+    working_hours: text("working_hours", 120),
+    notice: text("notice", 60),
+    about: text("about", 2000),
+    responsibilities: text("responsibilities", 4000),
+    terms: text("terms", 10000),
+  };
+  if (row.letter_type === "internship" && row.start_date && row.end_date && row.end_date < row.start_date)
+    return { error: "The internship end date is before the start date." };
+  if (!row.number) return { error: "Please enter a reference number." };
+  if (!row.candidate_name) return { error: "Please enter the candidate’s name." };
+  if (!row.position) return { error: "Please enter the position." };
+  if (!row.letter_date) return { error: "Please choose the letter date." };
+  if (!row.body) return { error: "The letter text is empty." };
+
+  let saved;
+  try {
+    const all = await offerLetters.list();
+    const same = all.find((x) => x.number === row.number && x.id !== id);
+    if (same) return { error: `Reference ${row.number} is already used (${same.candidate_name}). Please use another number.` };
+    if (id) {
+      const before = all.find((x) => x.id === id);
+      let history = Array.isArray(before?.history) ? [...before.history] : [];
+      const changed = offerChanges(before, row);
+      if (changed.length) history = withHistory({ ...before, history }, historyEntry("edited", changed.join(", ")));
+      if (before && before.status !== row.status) history = withHistory({ ...before, history }, historyEntry("status", `${offerStatusLabel(before.status)} → ${offerStatusLabel(row.status)}`));
+      saved = await offerLetters.update(id, { ...row, history });
+    } else {
+      saved = await offerLetters.insert({ ...row, history: [historyEntry("created", `${row.position} · ${offerStatusLabel(row.status)}`)] });
+    }
+  } catch (e) {
+    console.error(e);
+    if (/letter_type|department|end_date|work_mode|working_hours|notice|responsibilities|terms|about/i.test(String(e.message)))
+      return { error: "The database needs the internship update: run supabase/update-7.sql in the Supabase SQL Editor." };
+    if (/offer_letters|relation|column/i.test(String(e.message))) return { error: "The database needs the offer letters update: run supabase/update-6.sql in the Supabase SQL Editor." };
+    return { error: "Could not save. Is the database connected?" };
+  }
+  revalidatePath("/admin/offers");
+  redirect(formData.get("then") === "print" ? `/admin/offers/${saved.id}/print` : "/admin/offers?saved=1");
+}
+
+export async function setOfferStatus(formData) {
+  await requireAdmin();
+  const status = String(formData.get("status"));
+  if (!OFFER_STATUS_IDS.includes(status)) return;
+  const o = await offerLetters.get("id", String(formData.get("id")));
+  if (!o || o.status === status) return;
+  await offerLetters.update(o.id, { status, history: withHistory(o, historyEntry("status", `${offerStatusLabel(o.status)} → ${offerStatusLabel(status)}`)) });
+  revalidatePath("/admin/offers");
+}
+
+export async function deleteOffer(formData) {
+  await requireAdmin();
+  await offerLetters.remove(String(formData.get("id")));
+  revalidatePath("/admin/offers");
+}
+
+export async function duplicateOffer(formData) {
+  await requireAdmin();
+  const o = await offerLetters.get("id", String(formData.get("id")));
+  if (!o) return;
+  const all = await offerLetters.list();
+  const { id: _id, created_at: _c, ...rest } = o;
+  const number = nextOfferNumber(all, o.letter_type === "internship" ? "internship" : "job");
+  const today = todayISO();
+  const copy = await offerLetters.insert({
+    ...rest,
+    number,
+    letter_date: today,
+    accept_by: addDays(today, OFFER_DEFAULTS.acceptDays),
+    candidate_name: "",
+    candidate_address: "",
+    candidate_email: "",
+    candidate_phone: "",
+    greeting_name: "",
+    status: "draft",
+    history: [historyEntry("created", `Copied from ${o.number} (${o.position})`)],
+  });
+  revalidatePath("/admin/offers");
+  redirect(`/admin/offers/${copy.id}`);
 }

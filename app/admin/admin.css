@@ -450,3 +450,111 @@ html.anim .qh-timeline li:nth-child(n+4){animation-delay:.15s}
 @media (max-width: 1250px){.qf-preview-paper .iv{zoom:.7}}
 @media (max-width: 800px){.qf-preview-paper .iv{zoom:.45}}
 @media print{.iv{width:210mm;min-height:297mm;height:297mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+
+/* =====================================================================
+   OFFER LETTERS — the document (A4), like the Canva "Job Offer Letter" template
+   ===================================================================== */
+.ol{position:relative;box-sizing:border-box;display:flex;flex-direction:column;width:210mm;min-height:297mm;padding:22mm 21mm 24mm 21mm;background:#fff;color:#1b1b1b;font-family:var(--avenir);font-size:12pt;line-height:1.4;overflow:hidden}
+.ol *{box-sizing:border-box}
+.ol p,.ol h1{margin:0}
+.ol > *:not(.ol-bg){position:relative}
+.ol-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ol-head{display:flex;align-items:center;justify-content:space-between;min-height:16mm}
+.ol-brand{display:flex;align-items:center;gap:3.2mm}
+.ol-brand img{width:15mm;height:auto}
+.ol-brand span{font-family:var(--spartan);font-weight:700;font-size:8.6pt;line-height:1.15;letter-spacing:.02em}
+.ol-title{font-family:var(--spartan);font-weight:700;font-size:24pt;letter-spacing:.01em;line-height:1}
+.ol-rule{margin:6.6mm 0 0;border:0;border-top:.8px solid #9a9a9a}
+.ol-top{display:flex;justify-content:space-between;gap:10mm;margin-top:13.5mm}
+.ol-date{text-align:right}
+.ol-ref{font-size:9pt;color:#666}
+.ol-strong{font-weight:800}
+.ol-to{margin-top:11mm}
+.ol-body{margin-top:10mm;text-align:justify;hyphens:none}
+.ol-body p + p{margin-top:5.2mm}
+.ol-body strong{font-weight:800}
+.ol-foot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;padding-top:12mm}
+.ol-sign{font-size:11pt;line-height:1.3}
+.ol-signature{height:18mm;margin:.5mm 0 1mm;display:flex;align-items:center}
+.ol-signature img{max-height:18mm;max-width:56mm;object-fit:contain;mix-blend-mode:multiply}
+.ol-contact{list-style:none;margin:0 0 5mm;padding:0;display:flex;flex-direction:column;gap:2mm;font-size:11pt}
+.ol-contact li{display:flex;align-items:center;gap:3.4mm}
+.ol-contact svg{flex:none;width:4.4mm;height:4.4mm;fill:var(--ol-a)}
+.qf-preview-paper > .ol{zoom:.54}
+@media (max-width: 1250px){.qf-preview-paper > .ol{zoom:.7}}
+@media (max-width: 800px){.qf-preview-paper > .ol{zoom:.45}}
+@media print{
+  .ol{width:210mm;min-height:297mm;height:297mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .ol-pages .ol{break-after:page}
+  .ol-pages .ol:last-child{break-after:auto}
+  .ol-pages{gap:0}
+  .ol-pages .ol{box-shadow:none}
+}
+
+/* offer letter form + list */
+.ol-help{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px}
+.ol-help code{padding:1px 6px;border-radius:5px;background:#f1ece6;font-size:12px;cursor:pointer;border:0;font-family:ui-monospace,monospace}
+.ol-help code:hover{background:#e4dbd1}
+.ol-sig-box{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ol-sig-box img{height:56px;max-width:220px;object-fit:contain;padding:4px 8px;border:1px solid var(--a-line);border-radius:8px;background:#fff}
+.qa-status .st-declined{background:#fdecea !important;color:#8c1d18 !important}
+.qa-status .st-withdrawn{background:#f1ece6 !important;color:#7c726a !important}
+.qh-status.st-declined{background:#fdecea;color:#8c1d18}.qh-status.st-withdrawn{background:#f1ece6;color:#7c726a}
+
+/* internship letter (2 pages) */
+.ol-pages{display:flex;flex-direction:column;gap:10mm;background:transparent}
+.qp-paper:has(.ol-pages),.qf-preview-paper:has(.ol-pages){background:transparent;box-shadow:none}
+.ol-pages .ol{box-shadow:0 16px 40px -20px rgba(33,28,24,.45)}
+.ol-intern{font-size:10pt;line-height:1.34;padding-top:18mm;padding-bottom:19mm}
+.ol-intern .ol-rule{margin-top:5mm}
+.ol-intern .ol-sign,.ol-intern .ol-accept{font-size:10.4pt}
+.ol-intern .ol-top{margin-top:6.5mm}
+.ol-intern .ol-to{margin-top:5mm}
+.ol .ol-subject{margin-top:4.5mm;font-weight:800}
+.ol-intern .ol-body{margin-top:3.5mm}
+.ol-intern .ol-body p + p{margin-top:2.6mm}
+.ol-h{margin:5mm 0 2mm;padding-bottom:1.2mm;border-bottom:1.2px solid var(--ol-a);font-family:var(--spartan);font-weight:700;font-size:10.5pt;letter-spacing:.06em;text-transform:uppercase;color:var(--ol-a)}
+.ol-terms > .ol-h:first-child{margin-top:6mm}
+.ol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:0;border:1px solid #d9e6e5}
+.ol-grid > div{padding:1.7mm 3mm;border-right:1px solid #d9e6e5;border-bottom:1px solid #d9e6e5;background:rgba(0,157,147,.04)}
+.ol-grid > div:nth-child(3n){border-right:0}
+.ol-grid > div:nth-last-child(-n+3){border-bottom:0}
+.ol-grid dt{font-size:7.6pt;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b7a79}
+.ol-grid dd{margin:.6mm 0 0;font-weight:700}
+.ol-text{text-align:justify}
+.ol-text + .ol-text{margin-top:2mm}
+.ol-list{margin:0;padding-left:5mm}
+.ol-list li{margin-top:.8mm}
+.ol-list li::marker{color:var(--ol-a)}
+.ol-text + .ol-list{margin-top:1.4mm}
+.ol-foot-two{align-items:flex-start;padding-top:6mm}
+.ol-intern .ol-signature{height:14mm}
+.ol-intern .ol-signature img{max-height:14mm}
+.ol-accept{width:66mm;font-size:11pt;line-height:1.3}
+.ol-sig-line{height:14mm;margin:.5mm 0 1mm;border-bottom:1px solid #1b1b1b}
+.ol-contact-row{display:flex;justify-content:flex-start;margin-top:5mm;padding-top:3mm;border-top:.8px solid #d0d0d0}
+.ol-contact-row .ol-contact{flex-direction:row;flex-wrap:wrap;gap:2mm 6mm;margin:0;font-size:9pt}
+.ol-page-no{position:absolute !important;left:0;right:0;bottom:12.5mm;text-align:center;font-size:8pt;color:#8a8a8a}
+.qf-preview-paper .ol-pages{zoom:.54}
+.qf-preview-paper .ol-pages .ol{zoom:1}
+@media (max-width: 1250px){.qf-preview-paper .ol-pages{zoom:.7}}
+@media (max-width: 800px){.qf-preview-paper .ol-pages{zoom:.45}}
+.ol-type{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#e6f4f3;color:#00756d;font-size:11.5px;font-weight:800;vertical-align:middle}
+.ol-type.job{background:#f1ece6;color:#7c726a}
+.ol-switch{display:flex;gap:6px;flex-wrap:wrap}
+.ol-switch button{padding:8px 16px;border:1px solid var(--a-line);border-radius:999px;background:#fff;font:inherit;font-weight:700;cursor:pointer}
+.ol-switch button.on{background:var(--a-text);border-color:var(--a-text);color:#fff}
+
+/* internship letter — one page (date, candidate, letter, signature, acceptance) */
+.ol-intern .ol-meta{display:flex;justify-content:space-between;align-items:baseline;margin-top:8mm}
+.ol-intern .ol-to{margin-top:5mm}
+.ol-intern .ol-body{margin-top:5mm}
+.ol-intern .ol-body p + p{margin-top:2.3mm}
+.ol-intern > .ol-sign{margin-top:4mm}
+.ol-accept-box{margin-top:4.5mm;padding:3.2mm 5mm;border:1px solid #cfe3e1;border-left:3px solid var(--ol-a);background:rgba(0,157,147,.035);break-inside:avoid}
+.ol-accept-box p + p{margin-top:1.6mm}
+.ol-accept-lines{display:flex;gap:10mm;margin-top:5mm}
+.ol-accept-lines p{display:flex;align-items:flex-end;gap:2mm;margin:0 !important}
+.ol-blank{display:inline-block;width:62mm;border-bottom:1px solid #1b1b1b;height:1em}
+.ol-blank.short{width:38mm}
+.ol-intern .ol-contact-row{margin-top:auto;padding-top:3mm}
