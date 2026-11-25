@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { COMPANY, OFFER_DEFAULTS, COMPLETION_DEFAULTS, CERTIFICATE_DEFAULTS } from "@/lib/company";
+import { COMPANY, LETTERHEAD, OFFER_DEFAULTS, COMPLETION_DEFAULTS, CERTIFICATE_DEFAULTS } from "@/lib/company";
 import { letterParagraphs, longDate, firstName, titleName, offerType, fillPlaceholders } from "@/lib/offer";
 import { boldParts } from "@/lib/invoice";
 
@@ -11,47 +11,61 @@ const addressLines = (() => {
   return [parts.slice(0, half).join(", "), parts.slice(half).join(", ")];
 })();
 
-const Icon = ({ d }) => (
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d={d} /></svg>
-);
-const PIN = "M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z";
-const PHONE = "M3 8.5C3 5 6.6 3 12 3s9 2 9 5.5v1.2a1 1 0 0 1-1.2 1l-3.1-.6a1 1 0 0 1-.8-1V7.6C14.6 7 13.3 6.8 12 6.8s-2.6.2-3.9.8v1.5a1 1 0 0 1-.8 1l-3.1.6A1 1 0 0 1 3 9.7zM6 13h12l2 7H4z";
-const MAIL = "M2 6.5A1.5 1.5 0 0 1 3.5 5h17A1.5 1.5 0 0 1 22 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 17.5zm2.2.5 7.8 6 7.8-6z";
-
 const Rich = ({ parts }) => parts.map((p, j) => (p.bold ? <strong key={j}>{p.text}</strong> : <span key={j}>{p.text}</span>));
 
-// corner shapes + soft background swirl
-const Background = () => (
-  <svg className="ol-bg" viewBox="0 0 210 297" preserveAspectRatio="none" aria-hidden="true">
-    {/* 23D Studio logo as a faint watermark in the middle of the page */}
-    <image href="/images/logo-black.png" x="47" y="96" width="116" height="109.5" opacity="0.05" preserveAspectRatio="xMidYMid meet" />
-    <path d="M0 0 H57 L52 5.6 H0 Z" fill="var(--ol-b)" />
-    <path d="M95 0 H210 V10.6 H104 Z" fill="var(--ol-a)" />
-    <path d="M0 297 V286.4 H106 L115 297 Z" fill="var(--ol-a)" />
-    <path d="M150 297 L155 291.4 H210 V297 Z" fill="var(--ol-b)" />
-  </svg>
+// Letterhead (Canva "Minimalist Business Letterhead", 794 × 1123 px = A4): grey angled bands top and bottom,
+// a faint "STUDIO" watermark along the bottom, the logo on the left and the studio's details on the right.
+const LH_ICONS = {
+  pin: <path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21zm0-8.6a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2z" />,
+  phone: <path d="M6.6 3.5 9.4 7l-1.7 2.3a12.4 12.4 0 0 0 7 7L17 14.6l3.5 2.8-1.4 3c-.3.6-1 .9-1.6.8C10.7 20.1 3.9 13.3 2.8 6.5c-.1-.6.2-1.3.8-1.6z" />,
+  mail: <path d="M3 5.5h18v13H3zm1.5 1.5L12 12.6 19.5 7" />,
+  insta: <path d="M7.5 3h9A4.5 4.5 0 0 1 21 7.5v9a4.5 4.5 0 0 1-4.5 4.5h-9A4.5 4.5 0 0 1 3 16.5v-9A4.5 4.5 0 0 1 7.5 3zM12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6zM17.3 6.4v.2" />,
+  web: <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.4 3.6 5.4 3.6 9s-1.1 6.6-3.6 9c-2.5-2.4-3.6-5.4-3.6-9S9.5 5.4 12 3z" />,
+};
+const LhIcon = ({ name }) => (
+  <svg className="lh-ico" viewBox="0 0 24 24" aria-hidden="true">{LH_ICONS[name]}</svg>
 );
 
-const Head = ({ title }) => (
-  <>
-    <header className="ol-head">
-      <div className="ol-brand">
-        <img src="/images/logo-black.png" alt="23D Studio" />
-        <span>TWENTY-THREE D<br />STUDIO</span>
-      </div>
-      <h1 className="ol-title">{title}</h1>
-    </header>
-    <hr className="ol-rule" />
-  </>
+const Letterhead = () => (
+  <div className="ol-bg lh" aria-hidden="true">
+    <svg viewBox="0 0 794 1123" preserveAspectRatio="none">
+      <defs>
+        <clipPath id="lh-wm"><rect x="-190.06" y="1004.8" width="1079.93" height="352.89" /></clipPath>
+      </defs>
+      {/* big logo cropped to its "STUDIO" line, very faint, along the bottom */}
+      <image href="/images/logo-black.png" x="-353.13" y="253.69" width="1257.59" height="1176.79" opacity="0.05" preserveAspectRatio="none" clipPath="url(#lh-wm)" />
+      <g opacity="0.7">
+        <path d="M-165.89 1154.4H665.6L623.66 1081.01H-123.95Z" fill="#cccccc" />
+        <path d="M-302.09 1154.4H529.39L487.45 1081.01H-260.15Z" fill="#666666" />
+        <path d="M-231.23 1143.2H231.24L189.3 1069.81H-189.29Z" fill="#0b0b0b" />
+      </g>
+      <path d="M126.94 -27.3H958.43L916.49 46.08H168.88Z" fill="#cccccc" />
+      <path d="M311.87 -27.3H1143.36L1101.42 46.08H353.81Z" fill="#666666" />
+      <path d="M568.85 -27.3H1031.32L989.38 46.08H610.79Z" fill="#0b0b0b" opacity="0.28" />
+      <image href="/images/logo-black.png" x="79.37" y="111.72" width="95.12" height="89" preserveAspectRatio="none" />
+      <path d="M489.9 141.8H714.33M222.42 183.9H714.33M412.33 237.16H714.33" stroke="#000" strokeWidth="1" fill="none" />
+    </svg>
+    <div className="lh-name">
+      <p className="lh-strong">{LETTERHEAD.name}</p>
+      <p className="lh-tag">{LETTERHEAD.tagline}</p>
+    </div>
+    <div className="lh-row lh-address">
+      <LhIcon name="pin" />
+      <p>{LETTERHEAD.address.map((l, i) => <span key={i}>{l}</span>)}</p>
+    </div>
+    <div className="lh-row lh-contacts">
+      <span><LhIcon name="phone" />{LETTERHEAD.phone}</span>
+      <span><LhIcon name="mail" />{LETTERHEAD.email}</span>
+      <span><LhIcon name="insta" />{LETTERHEAD.instagram}</span>
+    </div>
+    <div className="lh-row lh-web">
+      <span><LhIcon name="web" />{LETTERHEAD.website}</span>
+    </div>
+  </div>
 );
 
-const Contact = () => (
-  <ul className="ol-contact">
-    <li><Icon d={PIN} />{addressLines[1] || COMPANY.address}</li>
-    <li><Icon d={PHONE} />{COMPANY.phone}</li>
-    <li><Icon d={MAIL} />{COMPANY.email}</li>
-  </ul>
-);
+// document title, under the letterhead
+const Head = ({ title }) => <h1 className="ol-title lh-title">{title}</h1>;
 
 const StudioAndDate = ({ o }) => (
   <section className="ol-top">
@@ -105,7 +119,7 @@ export default function OfferDocument({ o }) {
 function CompletionLetter({ o, title = "INTERNSHIP COMPLETION LETTER", extra = "" }) {
   return (
     <article className={`ol ol-intern ol-done ${extra}`} aria-label={`${title.toLowerCase()} ${o.number || ""}`} style={style}>
-      <Background />
+      <Letterhead />
       <Head title={title} />
       <StudioAndDate o={o} />
       <p className="ol-concern">{COMPLETION_DEFAULTS.heading}</p>
@@ -113,7 +127,6 @@ function CompletionLetter({ o, title = "INTERNSHIP COMPLETION LETTER", extra = "
         {letterParagraphs(o).map((parts, i) => <p key={i}><Rich parts={parts} /></p>)}
       </section>
       <Signature o={o} />
-      <div className="ol-contact-row"><Contact /></div>
     </article>
   );
 }
@@ -122,7 +135,7 @@ function CompletionLetter({ o, title = "INTERNSHIP COMPLETION LETTER", extra = "
 function RecommendationLetter({ o }) {
   return (
     <article className="ol ol-intern ol-done ol-lor" aria-label={`Letter of recommendation ${o.number || ""}`} style={style}>
-      <Background />
+      <Letterhead />
       <Head title="LETTER OF RECOMMENDATION" />
       <StudioAndDate o={o} />
       <section className="ol-body">
@@ -141,7 +154,6 @@ function RecommendationLetter({ o }) {
         <p>Email: {COMPANY.email}</p>
         <p>Contact: {COMPANY.phone}</p>
       </div>
-      <div className="ol-contact-row"><Contact /></div>
     </article>
   );
 }
@@ -151,7 +163,7 @@ function JobLetter({ o }) {
   const greeting = o.greeting_name || firstName(o.candidate_name);
   return (
     <article className="ol" aria-label={`Offer letter ${o.number || ""}`} style={style}>
-      <Background />
+      <Letterhead />
       <Head title="JOB OFFER LETTER" />
       <StudioAndDate o={o} />
       <To o={o} />
@@ -161,7 +173,6 @@ function JobLetter({ o }) {
       </section>
       <footer className="ol-foot">
         <Signature o={o} />
-        <Contact />
       </footer>
     </article>
   );
@@ -173,7 +184,7 @@ function InternshipLetter({ o }) {
   const acceptance = boldParts(fillPlaceholders(o.terms || "", o).replace(/\s*\n\s*/g, " ").trim());
   return (
     <article className="ol ol-intern" aria-label={`Internship offer letter ${o.number || ""}`} style={style}>
-      <Background />
+      <Letterhead />
       <Head title="INTERNSHIP OFFER LETTER" />
       <StudioAndDate o={o} />
       <To o={o} />
@@ -190,7 +201,6 @@ function InternshipLetter({ o }) {
           <p>Date: <span className="ol-blank short" /></p>
         </div>
       </section>
-      <div className="ol-contact-row"><Contact /></div>
     </article>
   );
 }

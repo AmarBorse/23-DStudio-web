@@ -633,3 +633,44 @@ html.anim .qh-timeline li:nth-child(n+4){animation-delay:.15s}
 .ol-lor .ol-signature{height:15mm}
 .ol-lor .ol-signature img{max-height:15mm}
 .ol-type.recommendation{background:#e6f0fb;color:#24558f}
+
+/* ---------- letterhead (Canva "Minimalist Business Letterhead") on every letter ---------- */
+/* page px → mm: 1px = 0.26458mm; text block right edge at 714.33px = 21.08mm from the right */
+.ol,.ol-intern{padding:67mm 21mm 21mm 21mm}
+.lh > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.lh-name,.lh-row{position:absolute;right:21.08mm;text-align:right;color:#000}
+.lh p{margin:0}
+.lh-name{top:26.6mm;font-family:var(--spartan);font-size:10.05pt;line-height:1.41;letter-spacing:.1em}
+.lh-strong{font-weight:700}
+.lh-tag{text-transform:uppercase}
+.lh-row{display:flex;justify-content:flex-end;align-items:center;gap:4.2mm;font-family:var(--avenir);font-size:8.4pt;line-height:1.4;white-space:nowrap}
+.lh-row span{display:inline-flex;align-items:center;gap:1.6mm}
+.lh-address{top:39.2mm;align-items:flex-start;gap:1.8mm}
+.lh-address p{display:flex;flex-direction:column}
+.lh-contacts{top:51mm}
+.lh-web{top:57.1mm;font-size:8.8pt}
+.lh-ico{width:3.9mm;height:3.9mm;flex:none;fill:none;stroke:#000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.lh-address .lh-ico{width:3.7mm;height:4.6mm;margin-top:-.6mm}
+.ol .lh-title{text-align:center;font-family:var(--spartan);font-weight:700;font-size:15pt;letter-spacing:.12em;line-height:1.2;white-space:normal}
+.ol-done .lh-title{font-size:15pt}
+.ol .lh-title + .ol-top{margin-top:7mm}
+.ol-intern .lh-title + .ol-top{margin-top:5mm}
+/* room for the letterhead: content runs from under its last rule to just above the bottom bands */
+.ol,.ol-intern{padding-top:64mm;padding-bottom:18mm}
+.ol .lh-title,.ol-done .lh-title{font-size:13.5pt}
+.ol .lh-title + .ol-top,.ol-intern .lh-title + .ol-top{margin-top:4mm}
+.ol-intern{line-height:1.3}
+.ol-intern .ol-body p + p{margin-top:1.8mm}
+.ol-lor{line-height:1.45}
+.ol-lor .ol-body p + p{margin-top:2.6mm}
+.ol-lor > .ol-sign{margin-top:5mm}
+.ol-intern .ol-to{margin-top:3.6mm}
+.ol-intern .ol-body{margin-top:3.6mm}
+.ol-intern > .ol-sign{margin-top:3mm}
+.ol-intern .ol-accept-box{margin-top:3.4mm}
+.ol-lor .ol-body{margin-top:8mm}
+/* completion letter and LOR keep their own, more open spacing */
+.ol-done{line-height:1.58}
+.ol-lor{line-height:1.45}
+.ol-done > .ol-sign{margin-top:14mm}
+.ol-lor > .ol-sign{margin-top:5mm}
